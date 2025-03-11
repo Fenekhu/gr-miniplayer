@@ -37,6 +37,7 @@ Future<void> setupWindow() async {
   WindowOptions windowOptions = WindowOptions(
     size: app_settings.windowSize * ((display.scaleFactor ?? 1) as double),
     skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
   );
 
   windowManager.addListener(_listener);
@@ -45,7 +46,6 @@ Future<void> setupWindow() async {
     // uncomment line below to lock aspect ratio. See resetWindowSize() as well.
     //await windowManager.setAspectRatio(windowWidth / windowHeight);
     await windowManager.setMaximizable(false);
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
     await windowManager.setPosition(app_settings.windowPos);
     await windowManager.show();
     await windowManager.focus();
