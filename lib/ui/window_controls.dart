@@ -14,7 +14,10 @@ class WindowControls extends StatelessWidget {
             width: 24,
             height: 24,
             child: IconButton(
-              icon: Icon(Icons.minimize),
+              icon: Icon(
+                Icons.minimize, 
+                color: Colors.white
+              ),
               iconSize: 16,
               padding: const EdgeInsets.all(0),
               style: ButtonStyle(
@@ -29,7 +32,10 @@ class WindowControls extends StatelessWidget {
             width: 24,
             height: 24,
             child: IconButton(
-              icon: Icon(Icons.close),
+              icon: Icon(
+                Icons.close, 
+                color: Colors.white
+              ),
               iconSize: 16,
               padding: const EdgeInsets.all(0),
               style: ButtonStyle(

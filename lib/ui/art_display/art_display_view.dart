@@ -33,7 +33,10 @@ class ArtDisplayView extends StatelessWidget {
                   width: 24,
                   height: 24,
                   child: IconButton(
-                    icon: Icon(viewModel.hide? Icons.visibility_off : Icons.visibility),
+                    icon: Icon(
+                      viewModel.hide? Icons.visibility_off : Icons.visibility,
+                      color: Colors.white
+                    ),
                     iconSize: 16,
                     padding: const EdgeInsets.all(0),
                     style: ButtonStyle(
