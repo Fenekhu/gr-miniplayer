@@ -44,9 +44,12 @@ class InfoWebsocket {
         break;
       } catch(e, trace) {
         developer.log('Connection Error', time: DateTime.now(), name:'Info Websocket', error: e, stackTrace: trace);
-        developer.log('Retrying in ${_retryDelay!.inSeconds} seconds', time: DateTime.now(), name:'Info Websocket');
-        if (_retryDelay == null) return Failure(Exception('Could not connect to websocket'));
-        await Future.delayed(_retryDelay!);
+        if (_retryDelay == null) {
+          return Failure(Exception('Could not connect to websocket'));
+        } else {
+          developer.log('Retrying in ${_retryDelay!.inSeconds} seconds', time: DateTime.now(), name:'Info Websocket');
+          await Future.delayed(_retryDelay!);
+        }
       }
     } while (_retryDelay != null);
 
