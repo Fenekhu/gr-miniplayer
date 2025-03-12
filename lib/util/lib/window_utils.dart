@@ -35,9 +35,10 @@ Future<void> setupWindow() async {
   Display display = await screenRetriever.getPrimaryDisplay();
   developer.log('display.scaleFactor: ${display.scaleFactor}');
   WindowOptions windowOptions = WindowOptions(
-    size: app_settings.windowSize * ((display.scaleFactor ?? 1) as double),
+    size: app_settings.windowSize * (display.scaleFactor?.toDouble() ?? 1),
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
+    windowButtonVisibility: false,
   );
 
   windowManager.addListener(_listener);
