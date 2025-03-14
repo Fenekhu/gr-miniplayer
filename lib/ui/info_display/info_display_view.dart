@@ -86,10 +86,7 @@ class InfoDisplayView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 4,
               children: [
-                SizedBox(
-                  width: 64,
-                  child: Text(snapshot.data?.elapsed ?? '--:--')
-                ),
+                Text(snapshot.data?.elapsed ?? '--:--'),
                 Expanded(
                   child: LinearProgressIndicator(
                     value: snapshot.data?.value ?? 0.5,
@@ -98,10 +95,7 @@ class InfoDisplayView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                SizedBox(
-                  width: 64,
-                  child: Text(snapshot.data?.total ?? '--:--')
-                ),
+                Text(snapshot.data?.total ?? '--:--'),
               ],
             );
           }
