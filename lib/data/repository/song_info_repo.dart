@@ -3,6 +3,14 @@ import 'package:gr_miniplayer/data/service/info_websocket.dart';
 import 'package:gr_miniplayer/domain/song_info.dart';
 import 'package:result_dart/result_dart.dart';
 
+// the api is not consistent with types. For example, sometimes you may get year: 2019 or year: '2019'.
+// Calling .toString on either will convert it to '2019', which can then be parsed.
+// Extra considerations have been made for null or invalid values.
+int? _tryToInt(dynamic v) {
+  if (v == null) return null;
+  return int.tryParse(v.toString());
+}
+
 class SongInfoRepo {
   SongInfoRepo({required InfoWebsocket infoWebsocket, required HiddenArtList hiddenArtList}) :
     _websocket = infoWebsocket, _hiddenArt = hiddenArtList {
@@ -17,16 +25,16 @@ class SongInfoRepo {
     final String? albumID = data['albumid'  ]?.toString();
     return SongInfo(
          songID: data['songid'   ]?.toString() ?? '0', 
-          title: data['title'    ] ?? '(untitled)', 
-         artist: data['artist'   ] ?? '(unknown artist)', 
-        albumID: albumID           ?? '0', 
-          album: data['album'    ] ?? '(unknown album)', 
-         circle: data['circle'   ] ?? '(unknown circle)', 
-           year: data['year'     ] ?? 0, 
-       albumArt: data['albumart' ] ?? '', 
-       duration: data['duration' ] ?? 0, 
-         played: data['played'   ] ?? 0, 
-      remaining: data['remaining'] ?? 0,
+          title: data['title'    ]?.toString() ?? '(untitled)', 
+         artist: data['artist'   ]?.toString() ?? '(unknown artist)', 
+        albumID: albumID                       ?? '0', 
+          album: data['album'    ]?.toString() ?? '(unknown album)', 
+         circle: data['circle'   ]?.toString() ?? '(unknown circle)', 
+       albumArt: data['albumart' ]?.toString() ?? '', 
+           year: _tryToInt(data['year'      ]) ?? 0, 
+       duration: _tryToInt(data['duration'  ]) ?? 0, 
+         played: _tryToInt(data['played'    ]) ?? 0, 
+      remaining: _tryToInt(data['remaining' ]) ?? 0,
         hideArt: albumID != null && (await _hiddenArt.list).contains(albumID), // will never hiding songs with no albumID be ok?
     );
   }
