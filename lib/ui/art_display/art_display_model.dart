@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/data/repository/hidden_art_manager.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
+import 'package:gr_miniplayer/domain/song_info.dart';
 
 class ArtDisplayModel extends ChangeNotifier {
   static const BoxFit _imageFit = BoxFit.contain;

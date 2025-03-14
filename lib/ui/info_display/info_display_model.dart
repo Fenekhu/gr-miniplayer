@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
+import 'package:gr_miniplayer/domain/song_info.dart';
 
 String _formatSeconds(int seconds) {
   final minutes = (seconds ~/ 60).toString();

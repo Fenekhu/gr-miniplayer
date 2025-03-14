@@ -9,6 +9,8 @@ enum StreamEndpoint {
   final String name;
   final String desc;
 
+  Uri get uri => Uri.parse('https://stream.gensokyoradio.net/$value');
+
   const StreamEndpoint({required this.value, required this.name, required this.desc});
 
   static StreamEndpoint fromValue(String value) => switch (value) {

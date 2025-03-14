@@ -70,13 +70,16 @@ class StringListProperty {
 /// Note that the values here represent the values stored in sharedPrefs,
 /// not necessarily the things they describe. 
 /// (eg, setting windowX wont move the window, but will change the window X on next open.)
-const _windowXProp = DoubleProperty("window.x", 0);
-const _windowYProp = DoubleProperty("window.y", 0);
-const _windowWidthProp = DoubleProperty("window.width", 288);
-const _windowHeightProp = DoubleProperty("window.height", 416);
+const _windowXProp = DoubleProperty('window.x', 0);
+const _windowYProp = DoubleProperty('window.y', 0);
+const _windowWidthProp = DoubleProperty('window.width', 288);
+const _windowHeightProp = DoubleProperty('window.height', 416);
 
 const _artQualityProp = StringProperty('art.quality', '500');
 const _streamEndpointProp = StringProperty('stream.endpoint', '2');
+
+const _volumeProp = DoubleProperty('player.volume', 1);
+const _cachingPauseProp = BoolProperty('player.cachingPause', true);
 
 final Offset defaultWindowPos = Offset(_windowXProp.defaultValue, _windowYProp.defaultValue);
 final Size defaultWindowSize = Size(_windowWidthProp.defaultValue, _windowHeightProp.defaultValue);
@@ -106,3 +109,9 @@ set artQuality(ArtQuality v) => _artQualityProp.value = v.value;
 
 StreamEndpoint get streamEndpoint => StreamEndpoint.fromValue(_streamEndpointProp.value);
 set streamEndpoint(StreamEndpoint v) => _streamEndpointProp.value = v.value;
+
+double get playerVolume => _volumeProp.value;
+set playerVolume(double v) => _volumeProp.value = v;
+
+bool get cachingPause => _cachingPauseProp.value;
+set cachingPause(bool v) => _cachingPauseProp.value = v;

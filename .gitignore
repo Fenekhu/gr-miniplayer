@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 dev-docs/
+*.lnk
 
 # IntelliJ related
 *.iml
