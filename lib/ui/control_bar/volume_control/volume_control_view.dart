@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/ui/control_bar/volume_control/volume_control_model.dart';
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 
 class VolumeControlView extends StatelessWidget {
   VolumeControlView({super.key, required this.viewModel});
@@ -15,8 +16,8 @@ class VolumeControlView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 32,
-      height: 32,
+      width: app_style.controlIconBoxSize,
+      height: app_style.controlIconBoxSize,
       child: MenuAnchor(
         controller: _menuController,
         clipBehavior: Clip.none,
@@ -53,7 +54,7 @@ class VolumeControlView extends StatelessWidget {
           )
         ],
         child: IconButton(
-          iconSize: 32,
+          iconSize: app_style.controlIconSize,
           padding: const EdgeInsets.all(0),
           icon: const Icon(Icons.volume_up),
           onPressed: _toggleMenu, 

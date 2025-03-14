@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/ui/info_display/info_display_model.dart';
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 import 'package:marquee/marquee.dart';
 
 bool _willTextOverflow({required String text, required TextStyle style, required double maxWidth}) {
@@ -23,7 +24,7 @@ class _MyMarquee extends StatelessWidget {
     return _willTextOverflow(text: text, style: style, maxWidth: maxWidth)?
       Marquee(
         text: text,
-        blankSpace: 48,
+        blankSpace: app_style.marqueeBlankWidth,
         pauseAfterRound: const Duration(seconds: 10),
         startAfter: const Duration(seconds: 10),
         showFadingOnlyWhenScrolling: false,
@@ -39,8 +40,6 @@ class InfoDisplayView extends StatelessWidget {
   const InfoDisplayView({super.key, required this.viewModel});
 
   final InfoDisplayModel viewModel;
-  final TextStyle _songTitleStyle = const TextStyle(fontWeight: FontWeight.bold);
-  final TextStyle _otherInfoStyle = const TextStyle(color: Colors.grey);
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +61,7 @@ class InfoDisplayView extends StatelessWidget {
                       height: 20,
                       child: _MyMarquee(
                         text: viewModel.title, 
-                        style: _songTitleStyle, 
+                        style: app_style.songTitleStyle, 
                         maxWidth: constraints.maxWidth,
                       ),
                     ),
@@ -70,7 +69,7 @@ class InfoDisplayView extends StatelessWidget {
                       height: 20,
                       child: _MyMarquee(
                         text: viewModel.albumCircle, 
-                        style: _otherInfoStyle, 
+                        style: app_style.otherInfoStyle, 
                         maxWidth: constraints.maxWidth,
                       ),
                     ),
@@ -87,7 +86,10 @@ class InfoDisplayView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 4,
               children: [
-                Text(snapshot.data?.elapsed ?? '--:--'),
+                SizedBox(
+                  width: 64,
+                  child: Text(snapshot.data?.elapsed ?? '--:--')
+                ),
                 Expanded(
                   child: LinearProgressIndicator(
                     value: snapshot.data?.value ?? 0.5,
@@ -96,7 +98,10 @@ class InfoDisplayView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                Text(snapshot.data?.total ?? '--:--'),
+                SizedBox(
+                  width: 64,
+                  child: Text(snapshot.data?.total ?? '--:--')
+                ),
               ],
             );
           }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/ui/control_bar/settings/settings_model.dart';
 import 'package:gr_miniplayer/util/enum/stream_endpoint.dart';
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 import 'package:gr_miniplayer/util/lib/window_utils.dart' as window_utils;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,8 +18,8 @@ class SettingsMenuView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 32,
-      height: 32,
+      width: app_style.controlIconBoxSize,
+      height: app_style.controlIconBoxSize,
       child: MenuAnchor(
         controller: _menuController,
         clipBehavior: Clip.none,
@@ -29,9 +30,9 @@ class SettingsMenuView extends StatelessWidget {
               spacing: 4,
               children: [
                 SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: const Icon(Icons.open_in_new),
+                  width: app_style.menuIconBoxSize,
+                  height: app_style.menuIconBoxSize,
+                  child: const Icon(Icons.open_in_new, size: app_style.menuIconSize),
                 ),
                 Text("gensokyoradio.net"),
               ],
@@ -50,7 +51,7 @@ class SettingsMenuView extends StatelessWidget {
           ),
         ],
         child: IconButton(
-          iconSize: 32,
+          iconSize: app_style.controlIconSize,
           padding: const EdgeInsets.all(0),
           icon: const Icon(Icons.more_horiz),
           onPressed: _toggleMenu,
@@ -98,9 +99,9 @@ class _CheckableText extends StatelessWidget {
       spacing: 4,
       children: [
         SizedBox(
-          width: 24,
-          height: 24,
-          child: checked? const Icon(Icons.check) : null,
+          width: app_style.menuIconBoxSize,
+          height: app_style.menuIconBoxSize,
+          child: checked? const Icon(Icons.check, size: app_style.menuIconSize) : null,
         ),
         Text(text),
       ],

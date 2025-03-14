@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/ui/art_display/art_display_model.dart';
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 
 class ArtDisplayView extends StatelessWidget {
   const ArtDisplayView({super.key, required this.viewModel});
@@ -32,14 +33,14 @@ class ArtDisplayView extends StatelessWidget {
             child: Container(
               color: Colors.black54,
               child: SizedBox(
-                width: 24,
-                height: 24,
+                width: app_style.windowIconBoxSize,
+                height: app_style.windowIconBoxSize,
                 child: IconButton(
                   icon: Icon(
                     viewModel.hide? Icons.visibility_off : Icons.visibility,
                     color: Colors.white
                   ),
-                  iconSize: 16,
+                  iconSize: app_style.windowIconSize,
                   padding: const EdgeInsets.all(0),
                   style: ButtonStyle(
                     shape: WidgetStatePropertyAll(

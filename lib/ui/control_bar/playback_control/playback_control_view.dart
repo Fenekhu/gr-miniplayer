@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/ui/control_bar/playback_control/playback_control_model.dart';
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 import 'package:just_audio/just_audio.dart' as ja;
 
 class PlaybackControlView extends StatelessWidget {
@@ -10,8 +11,8 @@ class PlaybackControlView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 32,
-      height: 32,
+      width: app_style.controlIconBoxSize,
+      height: app_style.controlIconBoxSize,
       child: StreamBuilder<ja.PlayerState>(
         stream: viewModel.playerStateStream, 
         builder: (context, snapshot) {
@@ -21,7 +22,7 @@ class PlaybackControlView extends StatelessWidget {
 
           final IconButton playButton = IconButton(
             icon: const Icon(Icons.play_arrow),
-            iconSize: 32,
+            iconSize: app_style.controlIconSize,
             padding: const EdgeInsets.all(0),
             onPressed: viewModel.play,
           );
@@ -36,7 +37,7 @@ class PlaybackControlView extends StatelessWidget {
           } else if (processingState != ja.ProcessingState.completed) {
             return IconButton(
               icon: const Icon(Icons.stop),
-              iconSize: 32,
+              iconSize: app_style.controlIconSize,
               padding: const EdgeInsets.all(0),
               onPressed: viewModel.stop, 
             );
