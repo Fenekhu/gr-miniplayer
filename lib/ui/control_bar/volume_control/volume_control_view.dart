@@ -3,6 +3,17 @@ import 'package:gr_miniplayer/ui/control_bar/volume_control/volume_control_model
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
 import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 
+double _calc100Width() {
+  final TextPainter textPainter = TextPainter(
+    text: TextSpan(text: 'mmm'),
+    textDirection: TextDirection.ltr,
+  )..layout();
+
+  return textPainter.width;
+}
+
+final double _100Width = _calc100Width();
+
 class VolumeControlView extends StatelessWidget {
   VolumeControlView({super.key, required this.viewModel});
 
@@ -29,19 +40,17 @@ class VolumeControlView extends StatelessWidget {
             stream: viewModel.volumeStream,
             builder: (context, snapshot) {
               final double volume = snapshot.data ?? 1;
-              return Stack(
+              return Row(
                 children: [
                   Container(
-                    width: 32,
-                    padding: const EdgeInsets.all(4),
+                    width: _100Width,
+                    margin: const EdgeInsets.all(0),
                     child: Text(
                       (volume*100).toStringAsFixed(0),
                       textAlign: TextAlign.right,
                     ),
                   ),
-                  Container(
-                    height: 32,
-                    padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  Expanded(
                     child: Slider.adaptive(
                       value: volume, 
                       onChanged: (newVol) => viewModel.volume = newVol,
