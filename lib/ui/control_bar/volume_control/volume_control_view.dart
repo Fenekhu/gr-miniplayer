@@ -12,7 +12,7 @@ double _calc100Width() {
   return textPainter.width;
 }
 
-final double _100Width = _calc100Width();
+final double _volumeTextWidth = _calc100Width();
 
 class VolumeControlView extends StatelessWidget {
   VolumeControlView({super.key, required this.viewModel});
@@ -43,7 +43,7 @@ class VolumeControlView extends StatelessWidget {
               return Row(
                 children: [
                   Container(
-                    width: _100Width,
+                    width: _volumeTextWidth,
                     margin: const EdgeInsets.all(0),
                     child: Text(
                       (volume*100).toStringAsFixed(0),

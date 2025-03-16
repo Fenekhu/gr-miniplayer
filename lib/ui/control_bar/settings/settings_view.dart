@@ -63,7 +63,7 @@ class SettingsMenuView extends StatelessWidget {
 
 class _DividerWithText extends StatelessWidget {
   final String text;
-  const _DividerWithText(this.text, {super.key});
+  const _DividerWithText(this.text);
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +91,7 @@ class _DividerWithText extends StatelessWidget {
 class _CheckableText extends StatelessWidget {
   final String text;
   final bool checked;
-  const _CheckableText({super.key, required this.text, required this.checked});
+  const _CheckableText({required this.text, required this.checked});
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,7 @@ class _StreamSourceItem extends StatelessWidget {
   final StreamEndpoint endpoint;
   final SettingsMenuModel viewModel;
 
-  const _StreamSourceItem({super.key, required this.endpoint, required this.viewModel});
+  const _StreamSourceItem({required this.endpoint, required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
