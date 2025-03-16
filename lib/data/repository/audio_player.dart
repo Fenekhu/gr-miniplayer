@@ -12,7 +12,7 @@ class AudioPlayer {
   static Future<void> ensureInitialized() async {
     JustAudioMediaKit.title = app_info.name;
     JustAudioMediaKit.pitch = false;
-    JustAudioMediaKit.ensureInitialized();
+    JustAudioMediaKit.ensureInitialized(macOS: true);
   }
 
   AudioPlayer() : 
