@@ -32,7 +32,7 @@ class _MyMarquee extends StatelessWidget {
         style: style,
       )
       :
-      Text(text, style: style, maxLines: 1);
+      Text(text, style: style, maxLines: 1, textAlign: TextAlign.center,);
   }
 }
 
