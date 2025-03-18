@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/util/lib/window_utils.dart' as window_utils;
 
-class WindowControls extends StatelessWidget {
-  const WindowControls({super.key});
+class WindowControlsView extends StatelessWidget {
+  const WindowControlsView({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -10,7 +10,7 @@ import 'package:gr_miniplayer/domain/player_state.dart';
 import 'package:gr_miniplayer/ui/art_display/art_display_model.dart';
 import 'package:gr_miniplayer/ui/art_display/art_display_view.dart';
 import 'package:gr_miniplayer/ui/control_bar/control_bar_view.dart';
-import 'package:gr_miniplayer/ui/window_controls.dart';
+import 'package:gr_miniplayer/ui/window_controls_view.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/shared_prefs.dart';
 import 'package:gr_miniplayer/util/lib/window_utils.dart' as window_utils;
@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Positioned(
             top: 0,
             right: 0,
-            child: WindowControls(),
+            child: WindowControlsView(),
           ),
         ],
       ),
