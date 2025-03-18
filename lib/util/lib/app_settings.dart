@@ -79,7 +79,7 @@ const _artQualityProp = StringProperty('art.quality', '500');
 const _streamEndpointProp = StringProperty('stream.endpoint', '2');
 
 const _volumeProp = DoubleProperty('player.volume', 1);
-const _cachingPauseProp = BoolProperty('player.cachingPause', true);
+const _cachingPauseProp = BoolProperty('player.cachingPause', false);
 
 final Offset defaultWindowPos = Offset(_windowXProp.defaultValue, _windowYProp.defaultValue);
 final Size defaultWindowSize = Size(_windowWidthProp.defaultValue, _windowHeightProp.defaultValue);
