@@ -45,6 +45,7 @@ class ControlBar extends StatelessWidget {
               SettingsMenuView(
                 viewModel: SettingsMenuModel(
                   audioPlayer: context.read(),
+                  userResources: context.read(),
                 ),
               ),
             ],

@@ -48,7 +48,7 @@ class InfoDisplayModel extends ChangeNotifier {
 
   void _onSongInfo(SongInfo info) {
     title = info.title;
-    albumCircle = "${info.album}    —    ${info.circle}";
+    albumCircle = '${info.album}    —    ${info.circle}';
     _duration = info.duration;
     _played = info.played;
     updateInfo();

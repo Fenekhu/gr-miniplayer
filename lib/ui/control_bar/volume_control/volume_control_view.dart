@@ -40,21 +40,26 @@ class VolumeControlView extends StatelessWidget {
             stream: viewModel.volumeStream,
             builder: (context, snapshot) {
               final double volume = snapshot.data ?? 1;
-              return Row(
+              return Stack(
+                alignment: AlignmentDirectional.topCenter,
                 children: [
                   Container(
-                    width: _volumeTextWidth,
-                    margin: const EdgeInsets.all(0),
+                    margin: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                     child: Text(
                       (volume*100).toStringAsFixed(0),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  Expanded(
-                    child: Slider.adaptive(
-                      value: volume, 
-                      onChanged: (newVol) => viewModel.volume = newVol,
-                      onChangeEnd: (newVol) => app_settings.playerVolume = newVol,
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(0, 12, 0, 0),
+                    height: 160,
+                    child: RotatedBox(
+                      quarterTurns: -1,
+                      child: Slider(
+                        value: volume, 
+                        onChanged: (newVol) => viewModel.volume = newVol,
+                        onChangeEnd: (newVol) => app_settings.playerVolume = newVol,
+                      ),
                     ),
                   ),
                 ],

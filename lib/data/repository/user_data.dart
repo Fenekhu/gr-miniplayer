@@ -1,12 +1,23 @@
+import 'dart:async';
+
 import 'package:gr_miniplayer/util/lib/shared_prefs.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
 import 'package:result_dart/result_dart.dart';
 
-String _getStoredAsi() => sharedPrefs.containsKey('user.asi') ? sharedPrefs.getString('user.asi') ?? '' : '';
-void _setStoredAsi(String asi) => sharedPrefs.setString('user.asi', asi);
+String _getStored(String key) => sharedPrefs.containsKey(key) ? sharedPrefs.getString(key) ?? '' : '';
+void _setStored(String key, String value) => sharedPrefs.setString(key, value);
 
-String _getStoredApiKey() => sharedPrefs.containsKey('user.apiKey') ? sharedPrefs.getString('user.apiKey') ?? '' : '';
-void _setStoredApiKey(String apiKey) => sharedPrefs.setString('user.apiKey', apiKey);
+String _getStoredUserID() => _getStored('user.id');
+void _setStoredUserID(String userID) => _setStored('user.id', userID);
+
+String _getStoredUsername() => _getStored('user.name');
+void _setStoredUsername(String username) => _setStored('user.name', username);
+
+String _getStoredAsi() => _getStored('user.asi');
+void _setStoredAsi(String asi) => _setStored('user.asi', asi);
+
+String _getStoredApiKey() => _getStored('user.apiKey');
+void _setStoredApiKey(String apiKey) => _setStored('user.apiKey', apiKey);
 
 class UserSessionData {
   final String userID;
@@ -16,7 +27,14 @@ class UserSessionData {
 
   const UserSessionData({required this.userID, required this.username, required this.asi, required this.apiKey});
   const UserSessionData.empty() : this(userID: '', username: '', asi: '', apiKey: '');
-  UserSessionData.fromStorage() : this(userID: '', username: '', asi: _getStoredAsi(), apiKey: _getStoredApiKey());
+  UserSessionData.fromStorage() : this(userID: _getStoredUserID(), username: _getStoredUsername(), asi: _getStoredAsi(), apiKey: _getStoredApiKey());
+
+  void store() {
+    _setStoredUserID(userID);
+    _setStoredUsername(username);
+    _setStoredAsi(asi);
+    _setStoredApiKey(apiKey);
+  }
 }
 
 class RatingFavoriteStatus {
@@ -32,16 +50,25 @@ class UserResources {
 
   UserResources({required StationApiClient apiClient})
     : _apiClient = apiClient,
-      userSessionData = UserSessionData.fromStorage(),
-      ratingFavoriteStatus = RatingFavoriteStatus.empty();
+      ratingFavoriteStatus = RatingFavoriteStatus.empty(),
+      _needsLoginPageController = StreamController.broadcast(),
+      _userDataStreamController = StreamController.broadcast() {
+        _userDataStreamController.add(UserSessionData.fromStorage());
+      }
 
   final StationApiClient _apiClient;
+  final StreamController<bool> _needsLoginPageController;
+  final StreamController<UserSessionData> _userDataStreamController;
 
-  UserSessionData userSessionData;
+  Stream<bool> get needsLoginPageStream => _needsLoginPageController.stream;
+  Stream<UserSessionData> get userDataStream => _userDataStreamController.stream;
+
   RatingFavoriteStatus ratingFavoriteStatus;
 
+  set needsLoginPage(bool value) => _needsLoginPageController.add(value);
+
   /// Logs in with the given credentials.
-  AsyncResult<UserSessionData> login(String username, String password) async {
+  AsyncResult<Unit> login(String username, String password) async {
     // As the station's API is not well documented and is subject to change,
     // it's possible that exceptions are thrown while trying to parse the response.
     // In that case, forward that exception as the Failure.
@@ -52,38 +79,37 @@ class UserResources {
       result = Failure(e);
     }
 
-    // process the successful result, transforming it into a UserSessionData object
-    // and storing the asi and api key for persistent sessions.
-    return result.map((lr) {
-      _setStoredAsi(lr.asi);
-      _setStoredApiKey(lr.apiKey);
-      userSessionData = UserSessionData(
-        userID: lr.userID, 
-        username: lr.username, 
-        asi: lr.asi, 
-        apiKey: lr.apiKey,
-      );
-      return userSessionData;
-    });
+    // process the successful result: 
+    //     store the asi and api key for persistent sessions.
+    //     transform it into a UserSessionData object.
+    //     add it to the user data state stream
+    return result
+      .map((lr) {
+        var userData = UserSessionData(
+          userID: lr.userID, 
+          username: lr.username, 
+          asi: lr.asi, 
+          apiKey: lr.apiKey,
+        );
+        userData.store();
+        _userDataStreamController.add(userData);
+        return unit;
+      });
+    
   }
 
   /// Logs out, clearing all user information.
   void logout() {
-    _setStoredAsi('');
-    _setStoredApiKey('');
-    userSessionData = UserSessionData(
-      userID: '', 
-      username: '', 
-      asi: '', 
-      apiKey: '',
-    );
+    var userData = UserSessionData.empty();
+    userData.store();
+    _userDataStreamController.add(userData);
   }
 
   /// Gets the current rating information and favorite status of the song.
   /// Note that the server requires songID match the currently playing song.
   AsyncResult<RatingFavoriteStatus> getRatingAndFavoriteStatus(String songID) async {
     // early exit if not logged in.
-    if (userSessionData.asi.isEmpty) {
+    if (_getStoredAsi().isEmpty) {
       return Success(RatingFavoriteStatus(rating: null, year: null, favorite: false));
     }
 
@@ -92,7 +118,7 @@ class UserResources {
     // In that case, forward that exception as the Failure.
     Result<RatingGetResponse> result;
     try {
-      result = await _apiClient.getRatingAndFavorited(userSessionData.asi, songID);
+      result = await _apiClient.getRatingAndFavorited(_getStoredAsi(), songID);
     } on Exception catch(e) {
       result = Failure(e);
     }
@@ -112,14 +138,14 @@ class UserResources {
     // early exit if rating is an invalid value somehow
     if (rating < 1 || rating > 5) return Failure(Exception('rating $rating outside valid range'));
     // early exit if not logged in.
-    if (userSessionData.asi.isEmpty) return Failure(Exception('Must be logged in to rate songs'));
+    if (_getStoredAsi().isEmpty) return Failure(Exception('Must be logged in to rate songs'));
 
     // As the station's API is not well documented and is subject to change,
     // it's possible that exceptions are thrown while trying to parse the response.
     // In that case, forward that exception as the Failure.
     Result<Unit> result;
     try {
-      result = await _apiClient.submitRating(userSessionData.asi, songID, rating);
+      result = await _apiClient.submitRating(_getStoredAsi(), songID, rating);
     } on Exception catch(e) {
       result = Failure(e);
     }
@@ -137,7 +163,7 @@ class UserResources {
 
   AsyncResult<RatingFavoriteStatus> toggleFavorite(String songID) async {
     // early exit if not logged in.
-    if (userSessionData.asi.isEmpty) return Failure(Exception('Must be logged in to favorite/unfavorite songs'));
+    if (_getStoredAsi().isEmpty) return Failure(Exception('Must be logged in to favorite/unfavorite songs'));
 
     // As the station's API is not well documented and is subject to change,
     // it's possible that exceptions are thrown while trying to parse the response.
@@ -145,9 +171,9 @@ class UserResources {
     Result<Unit> result;
     try {
       if (!ratingFavoriteStatus.favorite) { // add favorite if not favorited.
-        result = await _apiClient.addFavorite(userSessionData.asi, songID);
+        result = await _apiClient.addFavorite(_getStoredAsi(), songID);
       } else { // remove favorite if favorited.
-        result = await _apiClient.removeFavorite(userSessionData.asi, songID);
+        result = await _apiClient.removeFavorite(_getStoredAsi(), songID);
       }
     } on Exception catch(e) {
       result = Failure(e);

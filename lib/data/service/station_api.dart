@@ -6,6 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http;
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 
+Map<String, dynamic> _unwrapListJson(String json) {
+  final list = jsonDecode(json) as List<dynamic>;
+  return list.first as Map<String, dynamic>;
+}
+
 class LoginResponse {
   final String result;
   final String userID;
@@ -38,7 +43,7 @@ class StationApiClient {
     final response = await _client.post(
       Uri.parse('https://gensokyoradio.net/api/login/'),
       headers: {
-        'Content-Type': "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
         'user': username,
@@ -48,14 +53,14 @@ class StationApiClient {
 
     // process response
     if (response.statusCode == 200) {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final body = _unwrapListJson(response.body);
       // check the result
       final result = body['RESULT'] as String?;
       if (result?.toLowerCase() == 'success') {
         // ensure that the result is actually valid
         final asi = body['APPSESSIONID'];
         if (asi == null) {
-          return Failure(Exception("response did not contain an ASI"));
+          return Failure(Exception('response did not contain an ASI'));
         } else { // if it is, construct an API response.
           return Success(LoginResponse(
             result: result!, 
@@ -66,10 +71,10 @@ class StationApiClient {
           ));
         }
       } else { // if RESULT was not present or was not SUCCESS
-        return Failure(Exception("unsuccessful: $result"));
+        return Failure(Exception('unsuccessful: ${body['ERROR'] ?? 'unknown error'}'));
       }
     } else {
-      return Failure(Exception("unexpected response code: ${response.statusCode}"));
+      return Failure(Exception('unexpected response code: ${response.statusCode}'));
     }
   }
 
@@ -101,10 +106,10 @@ class StationApiClient {
           favorite: bool.parse(body['FAVORITE'], caseSensitive: false),
         ));
       } else {
-        return Failure(Exception("unsuccessful: $result"));
+        return Failure(Exception('unsuccessful: $result'));
       }
     } else {
-      return Failure(Exception("unexpected response code: ${response.statusCode}"));
+      return Failure(Exception('unexpected response code: ${response.statusCode}'));
     }
   }
 
@@ -131,10 +136,10 @@ class StationApiClient {
       if (result?.toLowerCase() == 'success') {
         return Success(unit);
       } else {
-        return Failure(Exception("unsuccessful: $result"));
+        return Failure(Exception('unsuccessful: $result'));
       }
     } else {
-      return Failure(Exception("unexpected response code: ${response.statusCode}"));
+      return Failure(Exception('unexpected response code: ${response.statusCode}'));
     }
   }
 
@@ -160,10 +165,10 @@ class StationApiClient {
       if (result?.toLowerCase() == 'success') {
         return Success(unit);
       } else {
-        return Failure(Exception("unsuccessful: $result"));
+        return Failure(Exception('unsuccessful: $result'));
       }
     } else {
-      return Failure(Exception("unexpected response code: ${response.statusCode}"));
+      return Failure(Exception('unexpected response code: ${response.statusCode}'));
     }
   }
 
@@ -189,10 +194,10 @@ class StationApiClient {
       if (result?.toLowerCase() == 'success') {
         return Success(unit);
       } else {
-        return Failure(Exception("unsuccessful: $result"));
+        return Failure(Exception('unsuccessful: $result'));
       }
     } else {
-      return Failure(Exception("unexpected response code: ${response.statusCode}"));
+      return Failure(Exception('unexpected response code: ${response.statusCode}'));
     }
   }
   

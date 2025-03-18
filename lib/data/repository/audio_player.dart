@@ -54,11 +54,11 @@ class AudioPlayer {
 
     _updateAudioSource().then((result) => result
       .onFailure((e) {
-        developer.log("Error updating audio source", time: DateTime.now(), name: "Audio Player", error: e);
+        developer.log('Error updating audio source', time: DateTime.now(), name: 'Audio Player', error: e);
       })
       .onSuccess((_) {
         String? path = (_jaPlayer.audioSource as ja.UriAudioSource?)?.uri.path;
-        developer.log("Set endpoint to $path}", time: DateTime.now(), name: "Audio Player");
+        developer.log('Set endpoint to $path}', time: DateTime.now(), name: 'Audio Player');
       })
     );
   }
@@ -116,7 +116,7 @@ class AudioPlayer {
     } on ja.PlayerInterruptedException catch (e) {
       return Failure(Exception('Player interrupted: ${e.message}'));
     } catch (e) {
-      return Failure(Exception("Player error unknown: $e"));
+      return Failure(Exception('Player error unknown: $e'));
     }
 
     if (wasPlaying) play();

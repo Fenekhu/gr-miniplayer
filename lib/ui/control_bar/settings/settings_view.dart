@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gr_miniplayer/data/repository/user_data.dart';
 import 'package:gr_miniplayer/ui/control_bar/settings/settings_model.dart';
 import 'package:gr_miniplayer/util/enum/stream_endpoint.dart';
 import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
@@ -24,8 +25,19 @@ class SettingsMenuView extends StatelessWidget {
         controller: _menuController,
         clipBehavior: Clip.none,
         menuChildren: [
+          StreamBuilder<UserSessionData>(
+            stream: viewModel.userDataStream,
+            initialData: UserSessionData.fromStorage(),
+            builder: (context, snapshot) {
+              bool isLoggedIn = snapshot.data?.asi.isNotEmpty ?? false;
+              return MenuItemButton(
+                onPressed: () => isLoggedIn? viewModel.logout() : viewModel.login(),
+                child: Text(isLoggedIn? 'Logout' : 'Login'),
+              );
+            }
+          ),
           MenuItemButton(
-            onPressed: () async => await launchUrl(Uri.parse("https://www.gensokyoradio.net/")),
+            onPressed: () async => await launchUrl(Uri.parse('https://www.gensokyoradio.net/')),
             child: Row(
               spacing: 4,
               children: [
@@ -34,11 +46,11 @@ class SettingsMenuView extends StatelessWidget {
                   height: app_style.menuIconBoxSize,
                   child: const Icon(Icons.open_in_new, size: app_style.menuIconSize),
                 ),
-                Text("gensokyoradio.net"),
+                Text('gensokyoradio.net'),
               ],
             ),
           ),
-          _DividerWithText("Quality"),
+          _DividerWithText('Quality'),
           for (StreamEndpoint ep in StreamEndpoint.values) _StreamSourceItem(viewModel: viewModel, endpoint: ep),
           Divider(
             indent: 8,
@@ -47,7 +59,7 @@ class SettingsMenuView extends StatelessWidget {
           ),
           MenuItemButton(
             onPressed: window_utils.resetWindowSize,
-            child: Text("Reset Window Size"),
+            child: Text('Reset Window Size'),
           ),
         ],
         child: IconButton(

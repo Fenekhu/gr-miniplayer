@@ -7,8 +7,8 @@ import 'package:gr_miniplayer/data/service/hidden_art_list.dart';
 import 'package:gr_miniplayer/data/service/info_websocket.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
 import 'package:gr_miniplayer/domain/player_state.dart';
-import 'package:gr_miniplayer/ui/art_display/art_display_model.dart';
-import 'package:gr_miniplayer/ui/art_display/art_display_view.dart';
+import 'package:gr_miniplayer/ui/art_or_login/art_or_login_model.dart';
+import 'package:gr_miniplayer/ui/art_or_login/art_or_login_view.dart';
 import 'package:gr_miniplayer/ui/control_bar/control_bar_view.dart';
 import 'package:gr_miniplayer/ui/window_controls_view.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<SongInfoRepo>().connect(retryDelay: null));
+    //WidgetsBinding.instance.addPostFrameCallback((_) => context.read<SongInfoRepo>().connect(retryDelay: null));
     context.read<PlayerStateCoordinator>();
   }
 
@@ -101,10 +101,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ListView(
             children: <Widget>[
               DragToMoveArea(
-                child: ArtDisplayView(
-                  viewModel: ArtDisplayModel(
-                    hiddenArtManager: context.read(), 
-                    songInfoRepo: context.read(),
+                child: ArtOrLoginView(
+                  viewModel: ArtOrLoginModel(
+                    userResources: context.read(),
                   )
                 ),
               ),
