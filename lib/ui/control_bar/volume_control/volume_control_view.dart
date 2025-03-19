@@ -3,17 +3,6 @@ import 'package:gr_miniplayer/ui/control_bar/volume_control/volume_control_model
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
 import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 
-double _calc100Width() {
-  final TextPainter textPainter = TextPainter(
-    text: TextSpan(text: 'mmm'),
-    textDirection: TextDirection.ltr,
-  )..layout();
-
-  return textPainter.width;
-}
-
-final double _volumeTextWidth = _calc100Width();
-
 class VolumeControlView extends StatelessWidget {
   VolumeControlView({super.key, required this.viewModel});
 
