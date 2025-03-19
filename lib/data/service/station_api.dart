@@ -6,9 +6,12 @@ import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http;
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 
-Map<String, dynamic> _unwrapListJson(String json) {
-  final list = jsonDecode(json) as List<dynamic>;
-  return list.first as Map<String, dynamic>;
+Map<String, dynamic> _unwrapJson(String data) {
+  final json = jsonDecode(data);
+  if (json is List<dynamic>) {
+    return json.first as Map<String, dynamic>;
+  }
+  return json as Map<String, dynamic>;
 }
 
 class LoginResponse {
@@ -53,7 +56,7 @@ class StationApiClient {
 
     // process response
     if (response.statusCode == 200) {
-      final body = _unwrapListJson(response.body);
+      final body = _unwrapJson(response.body);
       // check the result
       final result = body['RESULT'] as String?;
       if (result?.toLowerCase() == 'success') {
@@ -83,7 +86,7 @@ class StationApiClient {
     // send request
     // note: this only differs from submitRating request by the presence of the rating parameter in the body.
     final response = await _client.post(
-      Uri.parse('https://gensokyoradio.net/api/station/rating'),
+      Uri.parse('https://gensokyoradio.net/api/station/rating/'),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -95,15 +98,15 @@ class StationApiClient {
 
     // process response
     if (response.statusCode == 200) {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final body = _unwrapJson(response.body);
       // check the result
       final result = body['RESULT'] as String?;
       if (result?.toLowerCase() == 'success') {
         return Success(RatingGetResponse(
           result: result!,
-          rating: int.tryParse(body['RATING'] ?? ''),
-          year: int.tryParse(body['YEAR'] ?? ''),
-          favorite: bool.parse(body['FAVORITE'], caseSensitive: false),
+          rating: int.tryParse((body['RATING'] ?? '').toString()),
+          year: int.tryParse((body['YEAR'] ?? '').toString()),
+          favorite: bool.parse(body['FAVORITE'].toString(), caseSensitive: false),
         ));
       } else {
         return Failure(Exception('unsuccessful: $result'));
@@ -117,20 +120,20 @@ class StationApiClient {
   AsyncResult<Unit> submitRating(String asi, String songID, int rating) async {
     // send request
     final response = await _client.post(
-      Uri.parse('https://gensokyoradio.net/api/station/rating'),
+      Uri.parse('https://gensokyoradio.net/api/station/rating/'),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
         'asi': asi,
         'song_id': songID,
-        'rating': rating,
+        'rating': rating.toString(),
       },
     );
 
     // process response
     if (response.statusCode == 200) {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final body = _unwrapJson(response.body);
       // check the result
       final result = body['RESULT'] as String?;
       if (result?.toLowerCase() == 'success') {
@@ -159,7 +162,7 @@ class StationApiClient {
 
     // process response
     if (response.statusCode == 200) {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final body = _unwrapJson(response.body);
       // check the result
       final result = body['RESULT'] as String?;
       if (result?.toLowerCase() == 'success') {
@@ -188,7 +191,7 @@ class StationApiClient {
 
     // process response
     if (response.statusCode == 200) {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final body = _unwrapJson(response.body);
       // check the result
       final result = body['RESULT'] as String?;
       if (result?.toLowerCase() == 'success') {
