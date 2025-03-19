@@ -21,9 +21,12 @@ class SongInfoRepo {
   final HiddenArtList _hiddenArt;
   late final Stream<SongInfo> infoStream;
 
+  SongInfo? _latestInfo;
+  SongInfo? get latestInfo => _latestInfo;
+
   Future<SongInfo> _processSongInfo(Map<String, dynamic> data) async {
     final String? albumID = data['albumid'  ]?.toString();
-    return SongInfo(
+    _latestInfo = SongInfo(
          songID: data['songid'   ]?.toString() ?? '0', 
           title: data['title'    ]?.toString() ?? '(untitled)', 
          artist: data['artist'   ]?.toString() ?? '(unknown artist)', 
@@ -37,6 +40,7 @@ class SongInfoRepo {
       remaining: _tryToInt(data['remaining' ]) ?? 0,
         hideArt: albumID != null && (await _hiddenArt.list).contains(albumID), // will never hiding songs with no albumID be ok?
     );
+    return _latestInfo!;
   }
 
   /// Connects to the websocket. 

@@ -1,49 +1,54 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:gr_miniplayer/data/repository/art_provider.dart';
 import 'package:gr_miniplayer/data/repository/hidden_art_manager.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
 import 'package:gr_miniplayer/domain/song_info.dart';
 
-class ArtDisplayModel extends ChangeNotifier {
-  static const BoxFit _imageFit = BoxFit.contain;
-  
+class ArtDisplayModel extends ChangeNotifier {  
   ArtDisplayModel({
     required HiddenArtManager hiddenArtManager,
     required SongInfoRepo songInfoRepo,
+    required ArtProvider artProvider,
   }): _hiddenArtManager = hiddenArtManager,
       _songInfoRepo = songInfoRepo,
-      _placeholderArt = Image.asset('assets/images/placeholder-art.png', fit: _imageFit)
+      _artProvider = artProvider
       {
-        _songInfoRepo.infoStream.listen(_onSongInfo);
-        _albumArt = _placeholderArt;
+        _streamSubscription = _songInfoRepo.infoStream.listen(_onSongInfo);
+        _albumID = _songInfoRepo.latestInfo?.albumID ?? _albumID;
+        _hide = _songInfoRepo.latestInfo?.hideArt ?? _hide;
+        _albumArt = _artProvider.load(_songInfoRepo.latestInfo?.albumArt ?? '');
       }
 
   final HiddenArtManager _hiddenArtManager;
   final SongInfoRepo _songInfoRepo;
-  final Image _placeholderArt;
+  final ArtProvider _artProvider;
+
+  late final StreamSubscription<SongInfo> _streamSubscription;
 
   String _albumID = '0';
-  String _albumArtSrc = '';
   bool _hide = false;
   late Image _albumArt;
 
-  void _onSongInfo(SongInfo info) {
-    _albumID = info.albumID;
-    _albumArtSrc = info.albumArt;
-    _hide = info.hideArt;
+  bool get hide => _hide;
+  Image get albumArt => _albumArt;
 
-    _albumArt = _albumArtSrc.isEmpty? 
-      _placeholderArt :
-      Image.network(
-        _albumArtSrc,
-        fit: _imageFit,
-        errorBuilder: (context, error, stackTrace) => _placeholderArt,
-      );
+  void _onSongInfo(SongInfo info) {
+    log('onSongInfo', name: 'Art Display Model');
+    _albumID = info.albumID;
+    _hide = info.hideArt;
+    _albumArt = _artProvider.load(info.albumArt);
 
     updateArt();
   }
 
-  bool get hide => _hide;
-  Image get albumArt => _albumArt;
+  @override
+  void dispose() {
+    _streamSubscription.cancel();
+    super.dispose();
+  }
 
   void updateArt() {
     notifyListeners();

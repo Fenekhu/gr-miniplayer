@@ -32,6 +32,7 @@ class ArtOrLoginView extends StatelessWidget {
                 viewModel: ArtDisplayModel(
                   hiddenArtManager: context.read(), 
                   songInfoRepo: context.read(),
+                  artProvider: context.read(),
                 )
               );
           },

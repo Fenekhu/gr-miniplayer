@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gr_miniplayer/data/repository/art_provider.dart';
 import 'package:gr_miniplayer/data/repository/audio_player.dart';
 import 'package:gr_miniplayer/data/repository/hidden_art_manager.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
@@ -50,6 +51,9 @@ void main() async {
           create: (context) => AudioPlayer(),
           dispose: (context, value) => value.dispose(),
         ),
+        Provider(
+          create: (context) => ArtProvider(),
+        ),
 
         Provider(create: (context) => PlayerStateCoordinator(
           audioPlayer: context.read(), 
@@ -89,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    //WidgetsBinding.instance.addPostFrameCallback((_) => context.read<SongInfoRepo>().connect(retryDelay: null));
+    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<SongInfoRepo>().connect(retryDelay: null));
     context.read<PlayerStateCoordinator>();
   }
 
