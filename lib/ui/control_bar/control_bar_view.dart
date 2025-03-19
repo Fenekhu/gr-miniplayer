@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/ui/control_bar/playback_control/playback_control_model.dart';
 import 'package:gr_miniplayer/ui/control_bar/playback_control/playback_control_view.dart';
+import 'package:gr_miniplayer/ui/control_bar/rating_favorite/favorite_view.dart';
+import 'package:gr_miniplayer/ui/control_bar/rating_favorite/rating_favorite_model.dart';
+import 'package:gr_miniplayer/ui/control_bar/rating_favorite/rating_view.dart';
 import 'package:gr_miniplayer/ui/control_bar/settings/settings_model.dart';
 import 'package:gr_miniplayer/ui/control_bar/settings/settings_view.dart';
 import 'package:gr_miniplayer/ui/control_bar/volume_control/volume_control_model.dart';
@@ -14,6 +17,11 @@ class ControlBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ratingFavoriteModel = RatingFavoriteModel(
+      songInfoRepo: context.read(), 
+      userResources: context.read(),
+    );
+
     return FractionallySizedBox(
       widthFactor: 5.0/6,
       child: Column(
@@ -27,7 +35,7 @@ class ControlBar extends StatelessWidget {
             )
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               VolumeControlView(
@@ -35,13 +43,13 @@ class ControlBar extends StatelessWidget {
                   audioPlayer: context.read(),
                 ),
               ),
-              Spacer(),
+              RatingView(viewModel: ratingFavoriteModel),
               PlaybackControlView(
                 viewModel: PlaybackControlModel(
                   audioPlayer: context.read(),
                 ),
               ),
-              Spacer(),
+              FavoriteView(viewModel: ratingFavoriteModel),
               SettingsMenuView(
                 viewModel: SettingsMenuModel(
                   audioPlayer: context.read(),

@@ -50,20 +50,22 @@ class UserResources {
 
   UserResources({required StationApiClient apiClient})
     : _apiClient = apiClient,
-      ratingFavoriteStatus = RatingFavoriteStatus.empty(),
       _needsLoginPageController = StreamController.broadcast(),
-      _userDataStreamController = StreamController.broadcast() {
-        _userDataStreamController.add(UserSessionData.fromStorage());
-      }
+      _userDataStreamController = StreamController.broadcast(),
+      _ratingFavoriteStreamController = StreamController.broadcast();
 
   final StationApiClient _apiClient;
   final StreamController<bool> _needsLoginPageController;
   final StreamController<UserSessionData> _userDataStreamController;
+  final StreamController<RatingFavoriteStatus> _ratingFavoriteStreamController;
 
   Stream<bool> get needsLoginPageStream => _needsLoginPageController.stream;
   Stream<UserSessionData> get userDataStream => _userDataStreamController.stream;
+  Stream<RatingFavoriteStatus> get ratingFavoriteStream => _ratingFavoriteStreamController.stream;
 
-  RatingFavoriteStatus ratingFavoriteStatus;
+  RatingFavoriteStatus _cachedRatingFavoriteStatus = RatingFavoriteStatus.empty();
+
+  bool get isLoggedIn => _getStoredAsi().isNotEmpty;
 
   set needsLoginPage(bool value) => _needsLoginPageController.add(value);
 
@@ -107,10 +109,10 @@ class UserResources {
 
   /// Gets the current rating information and favorite status of the song.
   /// Note that the server requires songID match the currently playing song.
-  AsyncResult<RatingFavoriteStatus> getRatingAndFavoriteStatus(String songID) async {
+  AsyncResult<Unit> updateRatingAndFavoriteStatus(String songID) async {
     // early exit if not logged in.
     if (_getStoredAsi().isEmpty) {
-      return Success(RatingFavoriteStatus(rating: null, year: null, favorite: false));
+      return Success(unit);
     }
 
     // As the station's API is not well documented and is subject to change,
@@ -125,16 +127,17 @@ class UserResources {
 
     // process the succesful result, transforming it into a RatingFavoriteStatus object.
     return result.map((resp) {
-      ratingFavoriteStatus = RatingFavoriteStatus(
+      _cachedRatingFavoriteStatus = RatingFavoriteStatus(
         rating: resp.rating, 
         year: resp.year, 
         favorite: resp.favorite,
       );
-      return ratingFavoriteStatus;
+      _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
+      return unit;
     });
   }
 
-  AsyncResult<RatingFavoriteStatus> submitRating(String songID, int rating) async {
+  AsyncResult<Unit> submitRating(String songID, int rating) async {
     // early exit if rating is an invalid value somehow
     if (rating < 1 || rating > 5) return Failure(Exception('rating $rating outside valid range'));
     // early exit if not logged in.
@@ -151,17 +154,17 @@ class UserResources {
     }
 
     // process the succesful result, transforming it into a RatingFavoriteStatus object.
-    return result.map((resp) {
-      ratingFavoriteStatus = RatingFavoriteStatus(
+    return result.onSuccess((_) {
+      _cachedRatingFavoriteStatus = RatingFavoriteStatus(
         rating: rating, 
         year: DateTime.now().year, // note that the user may modify the date on their machine. This is ok, because the year is never sent to the server.
-        favorite: ratingFavoriteStatus.favorite,
+        favorite: _cachedRatingFavoriteStatus.favorite,
       );
-      return ratingFavoriteStatus;
+      _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
     });
   }
 
-  AsyncResult<RatingFavoriteStatus> toggleFavorite(String songID) async {
+  AsyncResult<Unit> toggleFavorite(String songID) async {
     // early exit if not logged in.
     if (_getStoredAsi().isEmpty) return Failure(Exception('Must be logged in to favorite/unfavorite songs'));
 
@@ -170,7 +173,7 @@ class UserResources {
     // In that case, forward that exception as the Failure.
     Result<Unit> result;
     try {
-      if (!ratingFavoriteStatus.favorite) { // add favorite if not favorited.
+      if (!_cachedRatingFavoriteStatus.favorite) { // add favorite if not favorited.
         result = await _apiClient.addFavorite(_getStoredAsi(), songID);
       } else { // remove favorite if favorited.
         result = await _apiClient.removeFavorite(_getStoredAsi(), songID);
@@ -179,14 +182,14 @@ class UserResources {
       result = Failure(e);
     }
 
-    // process the succesful result, transforming it into a RatingFavoriteStatus object.
-    return result.map((resp) {
-      ratingFavoriteStatus = RatingFavoriteStatus(
-        rating: ratingFavoriteStatus.rating, 
-        year: ratingFavoriteStatus.year,
-        favorite: !ratingFavoriteStatus.favorite, // toggle favorite state
+    // emit the updated status to the stream
+    return result.onSuccess((_) {
+      _cachedRatingFavoriteStatus = RatingFavoriteStatus(
+        rating: _cachedRatingFavoriteStatus.rating, 
+        year: _cachedRatingFavoriteStatus.year,
+        favorite: !_cachedRatingFavoriteStatus.favorite, // toggle favorite state
       );
-      return ratingFavoriteStatus;
+      _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
     });
   }
   
