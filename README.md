@@ -4,9 +4,9 @@ A compact, cross-platform unofficial desktop player for [Gensokyo Radio](https:/
 
 ## Build
 
-Flutter SDK must be installed prior to these build instructions. See Flutter's instructions for that [here](https://docs.flutter.dev/get-started/install). Choose your platform then "Desktop".
+Flutter SDK must be installed prior to these build instructions. See Flutter's instructions for that [here](https://docs.flutter.dev/get-started/install). Choose your platform -> Desktop.
 
-Clone this repository or download and extract it. In the project folder, run the following commands to setup the project.
+Clone this repository or download and extract it. In the project folder, run the following commands to setup the project:
 
 ```bash
 flutter create . --platforms="windows,macos,linux"
@@ -25,7 +25,7 @@ Where `<platforms>` is either `windows`, `macos` or `linux`. The output file wil
 
 ### Linux
 
-`libmpv` and `mpv` packages are required to run the project.
+`libmpv` and `mpv` packages are required to build the project.
 
 ```bash
 sudo apt install libmpv-dev mpv
