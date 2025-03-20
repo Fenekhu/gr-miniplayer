@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+/// wraps and caches the file that stores the list of albums who's art should be hidden.
 class HiddenArtList {
   Set<String>? _cachedList;
 

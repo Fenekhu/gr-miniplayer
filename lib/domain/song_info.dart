@@ -1,3 +1,4 @@
+/// All the information about a song usually given from the live info websocket.
 class SongInfo {
   final String songID;
   final String title;
@@ -26,4 +27,13 @@ class SongInfo {
     required this.remaining,
     required this.hideArt,
   });
+}
+
+/// represents all data needed to display the m:ss --------------- m:ss bar
+class ProgressStatus {
+  final String elapsed;
+  final String total;
+  final double value;
+
+  const ProgressStatus({required this.elapsed, required this.total, required this.value});
 }

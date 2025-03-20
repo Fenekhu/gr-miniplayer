@@ -17,24 +17,24 @@ class ControlBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // create this beforehand because it is shared by the rating and favorite buttons.
     final ratingFavoriteModel = RatingFavoriteModel(
-      songInfoRepo: context.read(), 
-      userResources: context.read(),
+      bridge: context.read(),
     );
 
-    return FractionallySizedBox(
+    return FractionallySizedBox( // constrain the side of the info and button display
       widthFactor: 5.0/6,
       child: Column(
         spacing: 8,
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          InfoDisplayView(
+          InfoDisplayView( // song title and album + artist info, progress text and bar
             viewModel: InfoDisplayModel(
               songInfoRepo: context.read(),
             )
           ),
-          Row(
+          Row( // buttons
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -43,13 +43,17 @@ class ControlBar extends StatelessWidget {
                   audioPlayer: context.read(),
                 ),
               ),
-              RatingView(viewModel: ratingFavoriteModel),
+              RatingView(
+                viewModel: ratingFavoriteModel
+              ),
               PlaybackControlView(
                 viewModel: PlaybackControlModel(
                   audioPlayer: context.read(),
                 ),
               ),
-              FavoriteView(viewModel: ratingFavoriteModel),
+              FavoriteView(
+                viewModel: ratingFavoriteModel
+              ),
               SettingsMenuView(
                 viewModel: SettingsMenuModel(
                   audioPlayer: context.read(),

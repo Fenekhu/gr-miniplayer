@@ -5,7 +5,6 @@ import 'package:gr_miniplayer/ui/art_or_login/art_or_login_model.dart';
 import 'package:gr_miniplayer/ui/login_page/login_page_model.dart';
 import 'package:gr_miniplayer/ui/login_page/login_page_view.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 class ArtOrLoginView extends StatelessWidget {
   const ArtOrLoginView({super.key, required this.viewModel});
@@ -14,29 +13,27 @@ class ArtOrLoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DragToMoveArea(
-      child: AspectRatio(
-        aspectRatio: 1.0,
-        child: StreamBuilder(
-          initialData: false,
-          stream: viewModel.needsLoginPageStream, 
-          builder: (context, snapshot) {
-            return (snapshot.data ?? false)?
-              LoginPageView(
-                viewModel: LoginPageModel(
-                  userResources: context.read(),
-                ),
+    return AspectRatio( // locks it to a square
+      aspectRatio: 1.0,
+      child: StreamBuilder( // builds the area based on the needsLoginPage state
+        initialData: false,
+        stream: viewModel.needsLoginPageStream, 
+        builder: (context, snapshot) {
+          return (snapshot.data ?? false)? // data: needsLoginPage
+            LoginPageView( // show login page if needed
+              viewModel: LoginPageModel(
+                userResources: context.read(),
+              ),
+            )
+            :
+            ArtDisplayView( // otherwise show the album art
+              viewModel: ArtDisplayModel(
+                hiddenArtManager: context.read(), 
+                songInfoRepo: context.read(),
+                artProvider: context.read(),
               )
-              :
-              ArtDisplayView(
-                viewModel: ArtDisplayModel(
-                  hiddenArtManager: context.read(), 
-                  songInfoRepo: context.read(),
-                  artProvider: context.read(),
-                )
-              );
-          },
-        ),
+            );
+        },
       ),
     );
   }

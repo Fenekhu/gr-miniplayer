@@ -1,3 +1,5 @@
+/// The endpoints of various quality provided by the station.
+// yes, 2 and 1 are backwards like that, because originally there was only one (Standard /1/) endpoint.
 enum StreamEndpoint {
     mobile(value: '2', name: 'Mobile',   desc: '64k Opus'),
   standard(value: '1', name: 'Standard', desc: '128k mp3'),

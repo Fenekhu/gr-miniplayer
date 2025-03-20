@@ -1,3 +1,4 @@
+/// information about this app
 library;
 
 import 'dart:io';

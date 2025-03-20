@@ -10,25 +10,32 @@ class FavoriteView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<RatingFavoriteStatus>(
-      stream: viewModel.ratingFavoriteStream,
-      initialData: RatingFavoriteStatus.empty(),
-      builder: (context, snapshot) {
-        final bool favorited = snapshot.data?.favorite ?? false;
-
-        return SizedBox(
-          width: app_style.controlIconBoxSize,
-          height: app_style.controlIconBoxSize,
-          child: IconButton(
-            icon: const Icon(Icons.favorite),
-            color: favorited? Colors.red : null,
-            iconSize: app_style.controlIconSize,
-            padding: const EdgeInsets.all(0),
-            tooltip: viewModel.isLoggedIn? null : 'Log in to favorite',
-            onPressed: viewModel.isLoggedIn? viewModel.toggleFavorite : null, 
-          ),
-        );
-      }
+    return SizedBox(
+      width: app_style.controlIconBoxSize,
+      height: app_style.controlIconBoxSize,
+      child: StreamBuilder<UserSessionData>(
+        stream: viewModel.bridge.userDataStream, // respond to changes in login status
+        initialData: UserSessionData.fromStorage(),
+        builder: (context, snapshot0) {
+          final bool isLoggedIn = snapshot0.data?.asi.isNotEmpty ?? false;
+        
+          return StreamBuilder<RatingFavoriteStatus>(
+            stream: viewModel.bridge.ratingFavoriteStream, // respond to changes in song favorite status
+            initialData: RatingFavoriteStatus.empty(),
+            builder: (context, snapshot1) {
+              final bool favorited = isLoggedIn && (snapshot1.data?.favorite ?? false);
+              return IconButton(
+                icon: const Icon(Icons.favorite),
+                color: favorited? Colors.red : null,
+                iconSize: app_style.controlIconSize,
+                padding: const EdgeInsets.all(0),
+                tooltip: isLoggedIn? null : 'Log in to favorite',
+                onPressed: isLoggedIn? viewModel.bridge.toggleFavorite : null, 
+              );
+            }
+          );
+        },
+      ),
     );
   }
 }

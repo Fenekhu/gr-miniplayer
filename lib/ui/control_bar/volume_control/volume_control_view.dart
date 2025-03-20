@@ -24,30 +24,30 @@ class VolumeControlView extends StatelessWidget {
         style: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(Color.lerp(Theme.of(context).colorScheme.surface, Colors.grey, 0.25)),
         ),
-        menuChildren: [
+        menuChildren: [ // items in the menu
           StreamBuilder<double>(
-            stream: viewModel.volumeStream,
+            stream: viewModel.volumeStream, // build items based on volume value
             builder: (context, snapshot) {
               final double volume = snapshot.data ?? 1;
-              return Stack(
+              return Stack( // stack to override slider's weird forced spacing at the ends.
                 alignment: AlignmentDirectional.topCenter,
                 children: [
-                  Container(
+                  Container( // volume text
                     margin: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                     child: Text(
                       (volume*100).toStringAsFixed(0),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  Container(
+                  Container( // volume slider
                     margin: const EdgeInsets.fromLTRB(0, 12, 0, 0),
                     height: 160,
                     child: RotatedBox(
                       quarterTurns: -1,
                       child: Slider(
                         value: volume, 
-                        onChanged: (newVol) => viewModel.volume = newVol,
-                        onChangeEnd: (newVol) => app_settings.playerVolume = newVol,
+                        onChanged: (newVol) => viewModel.volume = newVol, // adjust player volume as you slide it
+                        onChangeEnd: (newVol) => app_settings.playerVolume = newVol, // only write to persistent storage once you release slider.
                       ),
                     ),
                   ),
@@ -56,7 +56,7 @@ class VolumeControlView extends StatelessWidget {
             }
           )
         ],
-        child: IconButton(
+        child: IconButton( // the volume button
           iconSize: app_style.controlIconSize,
           padding: const EdgeInsets.all(0),
           icon: const Icon(Icons.volume_up),

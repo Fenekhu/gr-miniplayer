@@ -8,9 +8,12 @@ import 'package:just_audio/just_audio.dart' as ja;
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:result_dart/result_dart.dart';
 
+/// An audio player that plays a specific stream endpoint and outputs player state as a stream.
+/// Currently, this wraps a just_audio Audio Player.
 class AudioPlayer {
+  /// Initialize the player backend.
   static Future<void> ensureInitialized() async {
-    JustAudioMediaKit.title = app_info.name;
+    JustAudioMediaKit.title = app_info.name; // the text that will display in a system Volume Mixer
     JustAudioMediaKit.pitch = false;
     JustAudioMediaKit.ensureInitialized(
       linux: true,
@@ -25,33 +28,38 @@ class AudioPlayer {
     )
     {
       _jaPlayer.setVolume(clampDouble(app_settings.playerVolume, 0, 1));
-      playerStateStream = _jaPlayer.playerStateStream;
-      volumeStream = _jaPlayer.volumeStream;
       endpoint = app_settings.streamEndpoint;
     }
   
+  /// dispose underlying resources
   void dispose() async {
     await _jaPlayer.dispose();
   }
 
-  late final Stream<ja.PlayerState> playerStateStream;
-  late final Stream<double> volumeStream;
+  Stream<ja.PlayerState> get playerStateStream => _jaPlayer.playerStateStream;
+  Stream<double> get volumeStream => _jaPlayer.volumeStream;
 
-  final ja.AudioPlayer _jaPlayer;
-  StreamEndpoint? _endpoint;
+  final ja.AudioPlayer _jaPlayer; // underlying implementation player
+  StreamEndpoint? _endpoint; // the current endpoint that is being played.
 
+  // if cachingPause is enabled, this is used to fast-forward the stream when resuming.
+  // this was originally needed because Just Audio's native backends have very long load times,
+  // but the Media Kit backend is very fast.
   final _pauseWatch = Stopwatch();
   Duration? _pausePos;
 
   StreamEndpoint? get endpoint => _endpoint;
 
   set endpoint(StreamEndpoint? value) {
+    // early exit if value is null or the endpoint isn't actually being changed.
     if (_endpoint == value || value == null) return;
     _endpoint = value;
+    // the pause information will be invalid after switch endpoints, because the underlying player "resets"
     _pausePos = null;
     _pauseWatch.stop();
     _pauseWatch.reset();
 
+    // update audio source, then log result.
     _updateAudioSource().then((result) => result
       .onFailure((e) {
         developer.log('Error updating audio source', time: DateTime.now(), name: 'Audio Player', error: e);
@@ -69,8 +77,10 @@ class AudioPlayer {
 
   /// This won't resolve until content finishes playing.
   /// On a livestream, this should never resolve.
-  /// Maybe use this to detect an error if it ever does resolve?
+  /// In otherwords, this resolving should signal an error (such as connection dropped, or the broadcast server goes down)
   Future<void> play() async {
+    // pausePos != null means cachingPause is enabled. So we seek to the "head" of the stream,
+    // which is calculated based on where the head was when it was paused and how long it has been.
     if (_pausePos != null) {
       await _jaPlayer.seek(_pausePos! + _pauseWatch.elapsed);
       _pausePos = null;
@@ -100,11 +110,13 @@ class AudioPlayer {
     app_settings.cachingPause ? await pause() : await stop();
   }
 
+  /// updates the audio source for the underlying audio player.
   AsyncResult<Unit> _updateAudioSource() async {
     if (_endpoint == null) {
       return Failure(Exception('Endpoint is null'));
     }
 
+    // store whether the player was playing so we can resume after switching.
     bool wasPlaying = _jaPlayer.playing;
     await stop();
     try {

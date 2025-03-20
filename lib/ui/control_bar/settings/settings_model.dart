@@ -21,11 +21,15 @@ class SettingsMenuModel {
     if (endpoint != null) app_settings.streamEndpoint = endpoint;
   }
 
+  // notifies the app that it should display the login page
   void login() {
+    // triggers a needsLoginPageStream event
     _userResources.needsLoginPage = true;
   }
 
+  // clears the current user session data.
   void logout() {
+    // triggers a userDataStream event
     _userResources.logout();
   }
 }

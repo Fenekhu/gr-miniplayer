@@ -15,49 +15,49 @@ class RatingView extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<RatingFavoriteStatus>(
-      stream: viewModel.ratingFavoriteStream,
-      initialData: RatingFavoriteStatus.empty(),
-      builder: (context, snapshot) {
-        final int rating = snapshot.data?.rating ?? 0;
-        final bool ratedThisYear = snapshot.data?.year == DateTime.now().year;
+    return SizedBox(
+      width: app_style.controlIconBoxSize,
+      height: app_style.controlIconBoxSize,
+      child: StreamBuilder<RatingFavoriteStatus>(
+        stream: viewModel.bridge.ratingFavoriteStream, // respond to changes in song rating status
+        initialData: RatingFavoriteStatus.empty(),
+        builder: (context, snapshot0) {
+          final int rating = snapshot0.data?.rating ?? 0;
+          final bool ratedThisYear = snapshot0.data?.year == DateTime.now().year;
 
-        Color? starColor;
-        if (rating > 0) {
-          starColor = ratedThisYear ? Colors.amber : Colors.blue;
-        }
-
-        return SizedBox(
-          width: app_style.controlIconBoxSize,
-          height: app_style.controlIconBoxSize,
-          child: MenuAnchor(
+          // stars are yellow if rated this year, blue otherwise.
+          // this is to know which ratings count towards the station's yearly top 100.
+          // color will remain null (default) if unrated.
+          Color? starColor;
+          if (rating > 0) {
+            starColor = ratedThisYear ? Colors.amber : Colors.blue;
+          }
+      
+          return MenuAnchor(
             controller: _menuController,
             clipBehavior: Clip.none,
             style: MenuStyle(
               backgroundColor: WidgetStatePropertyAll(Color.lerp(Theme.of(context).colorScheme.surface, Colors.grey, 0.25)),
-              visualDensity: VisualDensity.compact,
             ),
-            menuChildren: [
+            menuChildren: [ // items in the menu popup
+              // generate a star for each rating value 1-5.
+              // reverse order because menus populate top to bottom.
               for(int i = 5; i >= 1; i--) 
                 Stack(
                   alignment: AlignmentDirectional.center,
                   children: [
-                    SizedBox(
+                    SizedBox( // star button
                       width: app_style.controlIconBoxSize,
                       height: app_style.controlIconBoxSize,
                       child: IconButton(
-                        icon: const Icon(null),
-                        onPressed: () => viewModel.setRating(i), 
+                        icon: const Icon(Icons.star),
+                        color: rating >= i? starColor : null, // color the star if number <= rating
+                        iconSize: app_style.controlIconSize,
+                        padding: const EdgeInsets.all(0), // prevent default 8.0 padding
+                        onPressed: () => viewModel.bridge.setRating(i), 
                       ),
                     ),
-                    IgnorePointer(
-                      child: Icon(
-                        Icons.star,
-                        color: rating >= i? starColor : null,
-                        size: app_style.controlIconSize,
-                      ),
-                    ),
-                    IgnorePointer(
+                    IgnorePointer( // text overlay
                       child: Text(
                         i.toString(),
                         style: TextStyle(color: Theme.of(context).colorScheme.surface),
@@ -66,28 +66,35 @@ class RatingView extends StatelessWidget {
                   ],
                 )
             ],
-            child: Stack(
+            child: Stack( // the widget from which the menu will pop up (the rating star button)
               alignment: AlignmentDirectional.center,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.star),
-                  color: starColor,
-                  iconSize: app_style.controlIconSize,
-                  padding: const EdgeInsets.all(0),
-                  tooltip: viewModel.isLoggedIn? null : 'Log in to rate',
-                  onPressed: viewModel.isLoggedIn? _toggleMenu : null, 
+                StreamBuilder<UserSessionData>(
+                  stream: viewModel.bridge.userDataStream,  // respond to changes in login status
+                  initialData: UserSessionData.fromStorage(),
+                  builder: (context, snapshot1) {
+                    final bool isLoggedIn = snapshot1.data?.asi.isNotEmpty ?? false;
+                    return IconButton( // the actual button
+                      icon: const Icon(Icons.star),
+                      color: starColor,
+                      iconSize: app_style.controlIconSize,
+                      padding: const EdgeInsets.all(0), // prevent default 8.0 padding
+                      tooltip: isLoggedIn? null : 'Log in to rate',
+                      onPressed: isLoggedIn? _toggleMenu : null, 
+                    );
+                  }
                 ),
                 IgnorePointer(
-                  child: Text(
+                  child: Text( // draw the rating number over it if its been rated.
                     rating == 0? '' : rating.toString(),
                     style: TextStyle(color: Theme.of(context).colorScheme.surface),
                   ),
                 ),
               ]
             ),
-          ),
-        );
-      }
+          );
+        },
+      ),
     );
   }
 }

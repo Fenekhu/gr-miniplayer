@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/data/repository/user_data.dart';
 import 'package:gr_miniplayer/ui/control_bar/settings/settings_model.dart';
@@ -21,58 +23,61 @@ class SettingsMenuView extends StatelessWidget {
     return SizedBox(
       width: app_style.controlIconBoxSize,
       height: app_style.controlIconBoxSize,
-      child: MenuAnchor(
-        controller: _menuController,
-        clipBehavior: Clip.none,
-        menuChildren: [
-          StreamBuilder<UserSessionData>(
-            stream: viewModel.userDataStream,
-            initialData: UserSessionData.fromStorage(),
-            builder: (context, snapshot) {
-              bool isLoggedIn = snapshot.data?.asi.isNotEmpty ?? false;
-              return MenuItemButton(
+      child: StreamBuilder<UserSessionData>( // this needs to be high in the chain because it will not receive updates if its not being drawn.
+        stream: viewModel.userDataStream, // build the login/logout button based on whether the user is logged in or not.
+        initialData: UserSessionData.fromStorage(),
+        builder: (context, snapshot) {
+          final bool isLoggedIn = snapshot.data?.isLoggedIn ?? false;
+          log('userDataStream build: isLoggedIn: ${snapshot.data?.isLoggedIn}', name: 'Settings View');
+          return MenuAnchor(
+            controller: _menuController,
+            clipBehavior: Clip.none,
+            menuChildren: [
+              MenuItemButton( // login/logout button
                 onPressed: () => isLoggedIn? viewModel.logout() : viewModel.login(),
                 child: Text(isLoggedIn? 'Logout' : 'Login'),
-              );
-            }
-          ),
-          MenuItemButton(
-            onPressed: () async => await launchUrl(Uri.parse('https://www.gensokyoradio.net/')),
-            child: Row(
-              spacing: 4,
-              children: [
-                SizedBox(
-                  width: app_style.menuIconBoxSize,
-                  height: app_style.menuIconBoxSize,
-                  child: const Icon(Icons.open_in_new, size: app_style.menuIconSize),
+              ),
+              MenuItemButton( // link to gensokyo radio website
+                onPressed: () async => await launchUrl(Uri.parse('https://www.gensokyoradio.net/')),
+                child: Row(
+                  spacing: 4,
+                  children: [
+                    SizedBox(
+                      width: app_style.menuIconBoxSize,
+                      height: app_style.menuIconBoxSize,
+                      child: const Icon(Icons.open_in_new, size: app_style.menuIconSize),
+                    ),
+                    Text('gensokyoradio.net'),
+                  ],
                 ),
-                Text('gensokyoradio.net'),
-              ],
+              ),
+              _DividerWithText('Quality'),
+              // stream endpoint selection
+              for (StreamEndpoint ep in StreamEndpoint.values) _StreamSourceItem(viewModel: viewModel, endpoint: ep),
+              Divider(
+                indent: 8,
+                endIndent: 8,
+                color: Colors.grey,
+              ),
+              MenuItemButton( // reset window size button
+                onPressed: window_utils.resetWindowSize,
+                child: Text('Reset Window Size'),
+              ),
+            ],
+            child: IconButton( // the widget that this menu will pop up from (the ... )
+              iconSize: app_style.controlIconSize,
+              padding: const EdgeInsets.all(0),
+              icon: const Icon(Icons.more_horiz),
+              onPressed: _toggleMenu,
             ),
-          ),
-          _DividerWithText('Quality'),
-          for (StreamEndpoint ep in StreamEndpoint.values) _StreamSourceItem(viewModel: viewModel, endpoint: ep),
-          Divider(
-            indent: 8,
-            endIndent: 8,
-            color: Colors.grey,
-          ),
-          MenuItemButton(
-            onPressed: window_utils.resetWindowSize,
-            child: Text('Reset Window Size'),
-          ),
-        ],
-        child: IconButton(
-          iconSize: app_style.controlIconSize,
-          padding: const EdgeInsets.all(0),
-          icon: const Icon(Icons.more_horiz),
-          onPressed: _toggleMenu,
-        ),
+          );
+        }
       ),
     );
   }
 }
 
+/// divider bar with text centered within
 class _DividerWithText extends StatelessWidget {
   final String text;
   const _DividerWithText(this.text);
@@ -100,6 +105,7 @@ class _DividerWithText extends StatelessWidget {
   }
 }
 
+/// text with an optional checkmark next to it, or space for one.
 class _CheckableText extends StatelessWidget {
   final String text;
   final bool checked;

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/util/lib/window_utils.dart' as window_utils;
 
+/// The minimize and close buttons
+// note that this needs no model, their functionality is provided entirely by window_utils.
 class WindowControlsView extends StatelessWidget {
   const WindowControlsView({super.key});
 
@@ -10,7 +12,7 @@ class WindowControlsView extends StatelessWidget {
       color: Colors.black54,
       child: Row(
         children: [
-          SizedBox(
+          SizedBox( // minimize button
             width: 24,
             height: 24,
             child: IconButton(
@@ -22,13 +24,13 @@ class WindowControlsView extends StatelessWidget {
               padding: const EdgeInsets.all(0),
               style: ButtonStyle(
                 shape: WidgetStatePropertyAll(
-                  LinearBorder(),
+                  LinearBorder(), // hover highlight fills the whole square
                 ),
               ),
               onPressed: () => window_utils.minimize(),
             ),
           ),
-          SizedBox(
+          SizedBox( // close button
             width: 24,
             height: 24,
             child: IconButton(
@@ -40,7 +42,7 @@ class WindowControlsView extends StatelessWidget {
               padding: const EdgeInsets.all(0),
               style: ButtonStyle(
                 shape: WidgetStatePropertyAll(
-                  LinearBorder(),
+                  LinearBorder(), // hover highlight fills the whole square
                 ),
               ),
               onPressed: () => window_utils.close(),

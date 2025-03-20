@@ -8,6 +8,7 @@ import 'package:gr_miniplayer/data/service/hidden_art_list.dart';
 import 'package:gr_miniplayer/data/service/info_websocket.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
 import 'package:gr_miniplayer/domain/player_state.dart';
+import 'package:gr_miniplayer/domain/rating_favorite_bridge.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_model.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_view.dart';
 import 'package:gr_miniplayer/ui/control_bar/control_bar_view.dart';
@@ -25,6 +26,7 @@ void main() async {
   await window_utils.setupWindow();
 
   runApp(
+    // creates "singletons" for all the dependency injection stuff
     MultiProvider(
       providers: [
         Provider(
@@ -58,7 +60,14 @@ void main() async {
         Provider(create: (context) => PlayerStateCoordinator(
           audioPlayer: context.read(), 
           songInfoRepo: context.read(),
-        ),)
+        )),
+        Provider(
+          create: (context) => RatingFavoriteBridge(
+            songInfoRepo: context.read(), 
+            userResources: context.read(),
+          ),
+          dispose: (context, value) => value.dispose(),
+        ),
       ],
       child: const MyApp(),
     )
@@ -82,6 +91,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// needs to be stateful to connect to the websocket after initializing everything in initState()
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -95,6 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => context.read<SongInfoRepo>().connect(retryDelay: null));
     context.read<PlayerStateCoordinator>();
+    context.read<RatingFavoriteBridge>();
   }
 
   @override
@@ -103,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: [
           ListView(
-            children: <Widget>[
+            children: [
               DragToMoveArea(
                 child: ArtOrLoginView(
                   viewModel: ArtOrLoginModel(

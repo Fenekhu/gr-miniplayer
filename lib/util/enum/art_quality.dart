@@ -1,3 +1,4 @@
+// the station is able to provide album images at two different resolutions
 enum ArtQuality {
   standard(name: 'Standard', value: '500'),
     mobile(name: 'Mobile',   value: '200');

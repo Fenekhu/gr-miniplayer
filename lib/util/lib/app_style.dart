@@ -1,3 +1,6 @@
+/// Common values for consistent styling within this app.
+library;
+
 import 'package:flutter/material.dart';
 
 const double controlIconBoxSize = 32;

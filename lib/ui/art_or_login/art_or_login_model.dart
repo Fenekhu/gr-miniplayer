@@ -1,12 +1,11 @@
 import 'package:gr_miniplayer/data/repository/user_data.dart';
 
+/// Provides access to the 'needLoginPage' state from UserResources.
 class ArtOrLoginModel {
   ArtOrLoginModel({required UserResources userResources}) :
-    _userResources = userResources {
-      needsLoginPageStream = _userResources.needsLoginPageStream;
-    }
+    _userResources = userResources;
 
   final UserResources _userResources;
 
-  late final Stream<bool> needsLoginPageStream;
+  Stream<bool> get needsLoginPageStream => _userResources.needsLoginPageStream;
 }

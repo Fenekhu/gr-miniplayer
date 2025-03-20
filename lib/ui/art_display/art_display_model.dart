@@ -7,6 +7,7 @@ import 'package:gr_miniplayer/data/repository/hidden_art_manager.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
 import 'package:gr_miniplayer/domain/song_info.dart';
 
+/// Wraps functions for getting album art updates and hiding/showing art.
 class ArtDisplayModel extends ChangeNotifier {  
   ArtDisplayModel({
     required HiddenArtManager hiddenArtManager,
@@ -26,6 +27,7 @@ class ArtDisplayModel extends ChangeNotifier {
   final SongInfoRepo _songInfoRepo;
   final ArtProvider _artProvider;
 
+  /// stores the subscription to the infoStream so it can be cancelled when this is destructed.
   late final StreamSubscription<SongInfo> _streamSubscription;
 
   String _albumID = '0';
@@ -35,6 +37,7 @@ class ArtDisplayModel extends ChangeNotifier {
   bool get hide => _hide;
   Image get albumArt => _albumArt;
 
+  // when info is received from the song info stream
   void _onSongInfo(SongInfo info) {
     log('onSongInfo', name: 'Art Display Model');
     _albumID = info.albumID;

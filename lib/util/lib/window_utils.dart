@@ -1,13 +1,15 @@
+/// provides functionality involving the display window.
 library;
-
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
 import 'package:window_manager/window_manager.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 
+/// a listener that saves window size and position information to settings in response to events.
 class WindowListenerImpl with WindowListener {
+  const WindowListenerImpl();
+
   @override
   void onWindowResize() {
     if (Platform.isLinux) saveWindowSize();
@@ -25,20 +27,23 @@ class WindowListenerImpl with WindowListener {
   void onWindowMoved() => saveWindowPos();
 }
 
-final _listener = WindowListenerImpl();
+// since the listener is stateless, it can be const.
+const _listener = WindowListenerImpl();
 
 /// positions, sizes, styles, etc. the window before displaying it.
 Future<void> setupWindow() async {
   await windowManager.ensureInitialized();
 
-  developer.log('app_settings.windowSize: ${app_settings.windowSize}');
-  Display display = await screenRetriever.getPrimaryDisplay();
-  developer.log('display.scaleFactor: ${display.scaleFactor}');
+  Display display = await screenRetriever.getPrimaryDisplay(); // needed to get the display's scale factor. may be always null on macos.
+
+  // I've noticed scale-factor awareness behaves differently in debug/release mode.
+  // debug: positioned right, sized wrong
+  // release: positioned wrong, sized right
   WindowOptions windowOptions = WindowOptions(
     size: app_settings.windowSize * (display.scaleFactor?.toDouble() ?? 1),
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden,
-    windowButtonVisibility: false,
+    skipTaskbar: false, // if true, the titlebar size will be added to the window size, causing it to grow with every launch
+    titleBarStyle: TitleBarStyle.hidden, // hides titlebar and buttons in windows
+    windowButtonVisibility: false, // hides titlebar and buttons in macos and linux
   );
 
   windowManager.addListener(_listener);
@@ -47,10 +52,9 @@ Future<void> setupWindow() async {
     // uncomment line below to lock aspect ratio. See resetWindowSize() as well.
     //await windowManager.setAspectRatio(windowWidth / windowHeight);
     await windowManager.setMaximizable(false);
-    await windowManager.setPosition(app_settings.windowPos);
+    await windowManager.setPosition(app_settings.windowPos); // see above note about size/positioning in debug/release
     await windowManager.show();
     await windowManager.focus();
-    developer.log('window size: ${await windowManager.getSize()}');
   });
 }
 

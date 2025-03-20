@@ -15,7 +15,7 @@ class PlaybackControlView extends StatelessWidget {
       height: app_style.controlIconBoxSize,
       child: StreamBuilder<ja.PlayerState>(
         stream: viewModel.playerStateStream, 
-        builder: (context, snapshot) {
+        builder: (context, snapshot) { // build play/stop/loading icon based on player state
           final ja.PlayerState? playerState = snapshot.data;
           final ja.ProcessingState? processingState = playerState?.processingState;
           final bool? playing = playerState?.playing;
@@ -27,6 +27,7 @@ class PlaybackControlView extends StatelessWidget {
             onPressed: viewModel.play,
           );
 
+          // show a loading circle when its loading (playing will be true)
           if (processingState == ja.ProcessingState.loading) {
             return CircularProgressIndicator(
               color: Theme.of(context).colorScheme.onSurface,
@@ -34,14 +35,14 @@ class PlaybackControlView extends StatelessWidget {
             );
           } else if (playing != true) {
             return playButton;
-          } else if (processingState != ja.ProcessingState.completed) {
+          } else if (processingState != ja.ProcessingState.completed) { // playing && (buffering || idle(shouldn't happen)) => show stop button
             return IconButton(
               icon: const Icon(Icons.stop),
               iconSize: app_style.controlIconSize,
               padding: const EdgeInsets.all(0),
               onPressed: viewModel.stop, 
             );
-          } else {
+          } else { // playing && completed (means something went wrong, a live stream should never complete)
             return playButton;
           }
         },

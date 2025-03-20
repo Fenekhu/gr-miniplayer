@@ -1,79 +1,49 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:result_dart/result_dart.dart';
+import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
+import 'package:gr_miniplayer/util/lib/json_util.dart' as json_util;
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http;
-import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
-
-Map<String, dynamic> _unwrapJson(String data) {
-  final json = jsonDecode(data);
-  if (json is List<dynamic>) {
-    return json.first as Map<String, dynamic>;
-  }
-  return json as Map<String, dynamic>;
-}
+import 'package:result_dart/result_dart.dart';
 
 class LoginResponse {
-  final String result;
   final String userID;
   final String username;
   final String asi;
   final String apiKey;
 
-  const LoginResponse({required this.result, required this.userID, required this.username, required this.asi, required this.apiKey});
+  const LoginResponse({required this.userID, required this.username, required this.asi, required this.apiKey});
 }
 
-class RatingGetResponse {
-  final String result;
-  final int? rating;
-  final int? year;
+class RatingResponse {
+  final int? rating; // null if not yet rated
+  final int? year; // null if not yet rated
   final bool favorite;
 
-  const RatingGetResponse({required this.result, required this.rating, required this.year, required this.favorite});
+  const RatingResponse({required this.rating, required this.year, required this.favorite});
 }
 
 class StationApiClient {
   StationApiClient(): _client = http.IOClient(HttpClient()..userAgent = app_info.userAgent);
 
+  /// custom http client with custom userAgent.
   final http.Client _client;
 
+  /// clean up http client
   void dispose() => _client.close();
 
-  /// Sends a login request
-  AsyncResult<LoginResponse> login(String username, String password) async {
-    // send login request
-    final response = await _client.post(
-      Uri.parse('https://gensokyoradio.net/api/login/'),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'user': username,
-        'pass': password,
-      },
-    );
-
+  // most API endpoints responses look like {'RESULT':'SUCCESS', ...}
+  /// Processes a response, checking that the RESULT field was SUCCESS, returning a failure if not.
+  /// Returns the response body if successful.
+  AsyncResult<Map<String, dynamic>> _checkGenericResponse(http.Response response, {int expectedCode = 200}) async {
     // process response
-    if (response.statusCode == 200) {
-      final body = _unwrapJson(response.body);
+    if (response.statusCode == expectedCode) {
+      final body = json_util.unwrapJson(response.body);
       // check the result
-      final result = body['RESULT'] as String?;
+      final result = body['RESULT']?.toString();
       if (result?.toLowerCase() == 'success') {
-        // ensure that the result is actually valid
-        final asi = body['APPSESSIONID'];
-        if (asi == null) {
-          return Failure(Exception('response did not contain an ASI'));
-        } else { // if it is, construct an API response.
-          return Success(LoginResponse(
-            result: result!, 
-            userID: body['USERID'], 
-            username: body['USERNAME'], 
-            asi: asi, 
-            apiKey: body['API'],
-          ));
-        }
-      } else { // if RESULT was not present or was not SUCCESS
+        return Success(body);
+      } else {
         return Failure(Exception('unsuccessful: ${body['ERROR'] ?? 'unknown error'}'));
       }
     } else {
@@ -81,8 +51,40 @@ class StationApiClient {
     }
   }
 
+  /// Sends a login request
+  AsyncResult<LoginResponse> login(String username, String password) async {
+    // send login request
+    final response = await _client.post(
+      Uri.parse('https://gensokyoradio.net/api/login/'),
+      headers: { 
+        'Content-Type': 'application/x-www-form-urlencoded', // technically this is not necessary. Looking at the client.post impl, passing a map type as body forces this kind of encoding anyway.
+      },
+      body: {
+        'user': username,
+        'pass': password,
+      },
+    );
+
+    // check if the server returned a successful response,
+    // then further process the response body into a Login response if so.
+    // flatMap is used when the function that transforms a success returns a Result type itself, and unwraps that result.
+    return _checkGenericResponse(response).flatMap((body) {
+      final asi = body['APPSESSIONID']?.toString();
+      if (asi == null) {
+        return Failure(Exception('response did not contain an ASI'));
+      } else { // if it is, construct an API response.
+        return Success(LoginResponse(
+          userID: body['USERID']?.toString() ?? '', // may be sent as a string or an int. int is not assignable to String. 
+          username: body['USERNAME']?.toString() ?? '', 
+          asi: asi, 
+          apiKey: body['API']?.toString() ?? '',
+        ));
+      }
+    });
+  }
+
   /// Retrieves the rating, year rated, and favorite status.
-  AsyncResult<RatingGetResponse> getRatingAndFavorited(String asi, String songID) async {
+  AsyncResult<RatingResponse> getRatingAndFavorited(String asi, String songID) async {
     // send request
     // note: this only differs from submitRating request by the presence of the rating parameter in the body.
     final response = await _client.post(
@@ -96,24 +98,15 @@ class StationApiClient {
       },
     );
 
-    // process response
-    if (response.statusCode == 200) {
-      final body = _unwrapJson(response.body);
-      // check the result
-      final result = body['RESULT'] as String?;
-      if (result?.toLowerCase() == 'success') {
-        return Success(RatingGetResponse(
-          result: result!,
-          rating: int.tryParse((body['RATING'] ?? '').toString()),
-          year: int.tryParse((body['YEAR'] ?? '').toString()),
-          favorite: bool.parse(body['FAVORITE'].toString(), caseSensitive: false),
-        ));
-      } else {
-        return Failure(Exception('unsuccessful: $result'));
-      }
-    } else {
-      return Failure(Exception('unexpected response code: ${response.statusCode}'));
-    }
+    // check if the server returned a successful response,
+    // then further process the response body into a Rating response if so.
+    return _checkGenericResponse(response).map((body) => 
+      RatingResponse(
+        rating: json_util.tryToInt(body['RATING']),
+        year: json_util.tryToInt(body['YEAR']),
+        favorite: json_util.tryToBool(body['FAVORITE']) ?? false,
+      )
+    );
   }
 
   /// Submits a song rating
@@ -131,19 +124,9 @@ class StationApiClient {
       },
     );
 
-    // process response
-    if (response.statusCode == 200) {
-      final body = _unwrapJson(response.body);
-      // check the result
-      final result = body['RESULT'] as String?;
-      if (result?.toLowerCase() == 'success') {
-        return Success(unit);
-      } else {
-        return Failure(Exception('unsuccessful: $result'));
-      }
-    } else {
-      return Failure(Exception('unexpected response code: ${response.statusCode}'));
-    }
+    // check if the server returned a successful response, 
+    // then discard the "empty" body.
+    return _checkGenericResponse(response).map((_) => unit);
   }
 
   /// Favorites a song
@@ -160,19 +143,9 @@ class StationApiClient {
       },
     );
 
-    // process response
-    if (response.statusCode == 200) {
-      final body = _unwrapJson(response.body);
-      // check the result
-      final result = body['RESULT'] as String?;
-      if (result?.toLowerCase() == 'success') {
-        return Success(unit);
-      } else {
-        return Failure(Exception('unsuccessful: $result'));
-      }
-    } else {
-      return Failure(Exception('unexpected response code: ${response.statusCode}'));
-    }
+    // check if the server returned a successful response, 
+    // then discard the "empty" body.
+    return _checkGenericResponse(response).map((_) => unit);
   }
 
   /// Unfavorites a song
@@ -189,19 +162,9 @@ class StationApiClient {
       },
     );
 
-    // process response
-    if (response.statusCode == 200) {
-      final body = _unwrapJson(response.body);
-      // check the result
-      final result = body['RESULT'] as String?;
-      if (result?.toLowerCase() == 'success') {
-        return Success(unit);
-      } else {
-        return Failure(Exception('unsuccessful: $result'));
-      }
-    } else {
-      return Failure(Exception('unexpected response code: ${response.statusCode}'));
-    }
+    // check if the server returned a successful response, 
+    // then discard the "empty" body.
+    return _checkGenericResponse(response).map((_) => unit);
   }
   
 }

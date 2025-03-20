@@ -15,20 +15,23 @@ class ArtDisplayView extends StatelessWidget {
       alignment: Alignment.topCenter,
       fit: StackFit.passthrough,
       children: [
-        ColoredBox(
+        ColoredBox( // background color for when images aren't square
           color: MediaQuery.platformBrightnessOf(context) == Brightness.dark? Colors.black : Colors.white,
         ),
-        ClipRect(
+        ClipRect( // actual image container (ClipRect to prevent blur from escaping)
           child: ImageFiltered(
-            enabled: viewModel.hide,
+            enabled: viewModel.hide, // whether to activate the blur or not
             imageFilter: ImageFilter.blur(sigmaX: 50, sigmaY: 50, tileMode: TileMode.decal),
-            child: ListenableBuilder(listenable: viewModel, builder: (_, __) => viewModel.albumArt),
+            child: ListenableBuilder(
+              listenable: viewModel, 
+              builder: (_, __) => viewModel.albumArt
+            ),
           ),
         ),
-        Positioned(
+        Positioned( // visibility toggle button (positioning)
           top: 0,
           left: 0,
-          child: Container(
+          child: Container( // for background color
             color: Colors.black54,
             child: SizedBox(
               width: app_style.windowIconBoxSize,
@@ -39,8 +42,8 @@ class ArtDisplayView extends StatelessWidget {
                   color: Colors.white
                 ),
                 iconSize: app_style.windowIconSize,
-                padding: const EdgeInsets.all(0),
-                style: ButtonStyle(
+                padding: const EdgeInsets.all(0), // prevents default 8.0 padding, which off-centers icon.
+                style: ButtonStyle( // causes the entire area to highlight on hover, instead of a circle.
                   shape: WidgetStatePropertyAll(
                     LinearBorder(),
                   ),

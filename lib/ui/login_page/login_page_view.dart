@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gr_miniplayer/ui/login_page/login_page_model.dart';
 
+// unfortunately I have to break my "Stateless only" rule because forms need state in flutter.
 class LoginPageView extends StatefulWidget {
   const LoginPageView({super.key, required this.viewModel});
 
@@ -31,17 +32,17 @@ class _LoginPageViewState extends State<LoginPageView> {
       child: Form(
         key: _formKey,
         child: ListenableBuilder(
-          listenable: widget.viewModel,
+          listenable: widget.viewModel, // to respond to error message changes
           builder: (context, _) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (widget.viewModel.error != null)
+                if (widget.viewModel.error != null) // error text if present
                   Text(
                     widget.viewModel.error!,
                     style: TextStyle(color: Theme.of(context).colorScheme.error),
                   ),
-                TextFormField(
+                TextFormField( // username field
                   controller: usernameController,
                   autocorrect: false,
                   autofillHints: ['username'],
@@ -49,7 +50,7 @@ class _LoginPageViewState extends State<LoginPageView> {
                   maxLengthEnforcement: MaxLengthEnforcement.enforced,
                   decoration: InputDecoration(
                     hintText: 'Username',
-                    counterText: '',
+                    counterText: '', // hide text length display
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -58,7 +59,7 @@ class _LoginPageViewState extends State<LoginPageView> {
                     return null;
                   },
                 ),
-                TextFormField(
+                TextFormField( // password field
                   controller: passwordController,
                   obscureText: true,
                   autocorrect: false,
@@ -67,11 +68,11 @@ class _LoginPageViewState extends State<LoginPageView> {
                   maxLengthEnforcement: MaxLengthEnforcement.enforced,
                   decoration: InputDecoration(
                     hintText: 'Password',
-                    counterText: '',
+                    counterText: '', // hide text length display
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Username cannot be blank';
+                      return 'Password cannot be blank';
                     } 
                     return null;
                   },
@@ -79,21 +80,21 @@ class _LoginPageViewState extends State<LoginPageView> {
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    ElevatedButton(
+                    ElevatedButton( // login button
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           widget.viewModel.login(usernameController.text, passwordController.text);
-                          usernameController.clear();
-                          passwordController.clear();
+                          usernameController.clear(); // clear username and
+                          passwordController.clear(); // password from memory after login
                         }
                       }, 
                       child: Text('Login'),
                     ),
                     Spacer(),
-                    ElevatedButton(
+                    ElevatedButton( // cancel button
                       onPressed: () {
-                        usernameController.clear();
-                        passwordController.clear();
+                        usernameController.clear(); // clear username and
+                        passwordController.clear(); // password from memory before close
                         widget.viewModel.close();
                       }, 
                       child: Text('Cancel')

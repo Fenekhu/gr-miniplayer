@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+// initialized in main()
 late SharedPreferencesWithCache sharedPrefs;
 
 // i wanted sharedPrefs to be global

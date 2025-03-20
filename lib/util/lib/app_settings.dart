@@ -1,3 +1,7 @@
+/// The settings for this app.
+/// Note that the values here represent the values stored in sharedPrefs,
+/// not necessarily the things they describe. 
+/// (eg, setting windowX wont move the window, but will change the window X on next open.)
 library;
 
 import 'dart:ui';
@@ -65,11 +69,6 @@ class StringListProperty {
   set value(List<String> v) => sharedPrefs.setStringList(key, v);
 }
 
-/// A class to contain and organize each property,
-/// as well as getter/setters to wrap them.
-/// Note that the values here represent the values stored in sharedPrefs,
-/// not necessarily the things they describe. 
-/// (eg, setting windowX wont move the window, but will change the window X on next open.)
 const _windowXProp = DoubleProperty('window.x', 0);
 const _windowYProp = DoubleProperty('window.y', 0);
 const _windowWidthProp = DoubleProperty('window.width', 288);
@@ -79,7 +78,7 @@ const _artQualityProp = StringProperty('art.quality', '500');
 const _streamEndpointProp = StringProperty('stream.endpoint', '2');
 
 const _volumeProp = DoubleProperty('player.volume', 1);
-const _cachingPauseProp = BoolProperty('player.cachingPause', false);
+// const _cachingPauseProp = BoolProperty('player.cachingPause', false); // no longer needed with Media Kit backend
 
 final Offset defaultWindowPos = Offset(_windowXProp.defaultValue, _windowYProp.defaultValue);
 final Size defaultWindowSize = Size(_windowWidthProp.defaultValue, _windowHeightProp.defaultValue);
@@ -113,5 +112,5 @@ set streamEndpoint(StreamEndpoint v) => _streamEndpointProp.value = v.value;
 double get playerVolume => _volumeProp.value;
 set playerVolume(double v) => _volumeProp.value = v;
 
-bool get cachingPause => _cachingPauseProp.value;
-set cachingPause(bool v) => _cachingPauseProp.value = v;
+bool get cachingPause => false; //_cachingPauseProp.value;
+set cachingPause(bool v) {} //=> _cachingPauseProp.value = v;

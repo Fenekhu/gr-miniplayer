@@ -1,18 +1,14 @@
 import 'package:gr_miniplayer/data/repository/audio_player.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 
+/// wraps state and functionality of the play/stop button
 class PlaybackControlModel {
-  PlaybackControlModel({
-    required AudioPlayer audioPlayer,
-  }) : 
-    _player = audioPlayer
-    {
-      playerStateStream = _player.playerStateStream;
-    }
+  PlaybackControlModel({required AudioPlayer audioPlayer}) : 
+    _player = audioPlayer;
 
   final AudioPlayer _player;
 
-  late final Stream<ja.PlayerState> playerStateStream;
+  Stream<ja.PlayerState> get playerStateStream => _player.playerStateStream;
 
   Future<void> play() {
     return _player.play();
