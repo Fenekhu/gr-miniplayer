@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "com.fenekhu" "\0"
             VALUE "FileDescription", "gr_miniplayer" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "gr_miniplayer" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 Fenekhu. Open source under GNU GPLv3." "\0"
             VALUE "OriginalFilename", "gr_miniplayer.exe" "\0"
-            VALUE "ProductName", "gr_miniplayer" "\0"
+            VALUE "ProductName", "Gensokyo Radio Miniplayer" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
