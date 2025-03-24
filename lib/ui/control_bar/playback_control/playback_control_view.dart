@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gr_miniplayer/domain/player_state.dart';
 import 'package:gr_miniplayer/ui/control_bar/playback_control/playback_control_model.dart';
 import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
-import 'package:just_audio/just_audio.dart' as ja;
 
 class PlaybackControlView extends StatelessWidget {
   const PlaybackControlView({super.key, required this.viewModel});
@@ -13,11 +13,11 @@ class PlaybackControlView extends StatelessWidget {
     return SizedBox(
       width: app_style.controlIconBoxSize,
       height: app_style.controlIconBoxSize,
-      child: StreamBuilder<ja.PlayerState>(
+      child: StreamBuilder<PlayerState>(
         stream: viewModel.playerStateStream, 
         builder: (context, snapshot) { // build play/stop/loading icon based on player state
-          final ja.PlayerState? playerState = snapshot.data;
-          final ja.ProcessingState? processingState = playerState?.processingState;
+          final PlayerState? playerState = snapshot.data;
+          final ProcessingState? processingState = playerState?.processingState;
           final bool? playing = playerState?.playing;
 
           final IconButton playButton = IconButton(
@@ -28,14 +28,14 @@ class PlaybackControlView extends StatelessWidget {
           );
 
           // show a loading circle when its loading (playing will be true)
-          if (processingState == ja.ProcessingState.loading) {
+          if (processingState == ProcessingState.loading) {
             return CircularProgressIndicator(
               color: Theme.of(context).colorScheme.onSurface,
               strokeAlign: CircularProgressIndicator.strokeAlignInside,
             );
           } else if (playing != true) {
             return playButton;
-          } else if (processingState != ja.ProcessingState.completed) { // playing && (buffering || idle(shouldn't happen)) => show stop button
+          } else if (processingState != ProcessingState.completed) { // playing && (buffering || idle(shouldn't happen)) => show stop button
             return IconButton(
               icon: const Icon(Icons.stop),
               iconSize: app_style.controlIconSize,

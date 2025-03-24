@@ -1,38 +1,61 @@
-import 'dart:developer';
-
-import 'package:gr_miniplayer/data/repository/audio_player.dart';
-import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
 import 'package:gr_miniplayer/domain/song_info.dart';
 import 'package:just_audio/just_audio.dart' as ja;
-import 'package:stream_transform/stream_transform.dart';
+
+// Copying the JustAudio enum so that other files are not dependent on JustAudio.
+/// Enumerates the different processing states of a player.
+enum ProcessingState {
+  /// The player has not loaded an [AudioSource].
+  idle,
+
+  /// The player is loading an [AudioSource].
+  loading,
+
+  /// The player is buffering audio and unable to play.
+  buffering,
+
+  /// The player is has enough audio buffered and is able to play.
+  ready,
+
+  /// The player has reached the end of the audio.
+  completed,
+  
+  ;
+
+  static ProcessingState fromJA(ja.ProcessingState jaState) {
+    return switch (jaState) {
+      ja.ProcessingState.idle => idle,
+      ja.ProcessingState.loading => loading,
+      ja.ProcessingState.buffering => buffering,
+      ja.ProcessingState.ready => ready,
+      ja.ProcessingState.completed => completed,
+    };
+  }
+}
+
+// Copying the JustAudio state so other files are not dependent on JustAudio
+/// Encapsulates the playing and processing states. These two states vary
+/// orthogonally, and so if [processingState] is [ProcessingState.buffering],
+/// you can check [playing] to determine whether the buffering occurred while
+/// the player was playing or while the player was paused.
+class PlayerState {
+  /// Whether the player will play when [processingState] is
+  /// [ProcessingState.ready].
+  final bool playing;
+
+  /// The current processing state of the player.
+  final ProcessingState processingState;
+
+  PlayerState({required this.playing, required this.processingState});
+
+  PlayerState.fromJA(ja.PlayerState jaState): 
+    playing = jaState.playing, processingState = ProcessingState.fromJA(jaState.processingState);
+}
 
 /// Represents the current song and player state
 class PlayerInfoState {
   final bool playing;
-  final ja.ProcessingState processingState;
+  final ProcessingState processingState;
   final SongInfo songInfo;
 
   const PlayerInfoState({required this.playing, required this.processingState, required this.songInfo});
-}
-
-/// Bridges the player and song info for use with services (discord, media transport)
-class PlayerStateCoordinator {
-  PlayerStateCoordinator({
-    required AudioPlayer audioPlayer,
-    required SongInfoRepo songInfoRepo,
-  }) :
-    _player = audioPlayer,
-    _infoRepo = songInfoRepo
-  {
-    // create a new stream that combines the playerStateStream and songInfoStream into one.
-    stateInfoStream = _infoRepo.infoStream.combineLatest(_player.playerStateStream, (info, playerState) {
-      log('{playing: ${playerState.playing}}, processingState: ${playerState.processingState.name}, songInfo.title: ${info.title}}', name: 'Player State');
-      return PlayerInfoState(playing: playerState.playing, processingState: playerState.processingState, songInfo: info);
-    }).asBroadcastStream();
-  }
-
-  final AudioPlayer _player;
-  final SongInfoRepo _infoRepo;
-
-  late final Stream<PlayerInfoState> stateInfoStream;
 }

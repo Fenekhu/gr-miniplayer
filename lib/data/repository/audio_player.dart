@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:ui';
 
+import 'package:gr_miniplayer/domain/player_state.dart';
 import 'package:gr_miniplayer/util/enum/stream_endpoint.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
@@ -29,6 +30,7 @@ class AudioPlayer {
     {
       _jaPlayer.setVolume(clampDouble(app_settings.playerVolume, 0, 1));
       endpoint = app_settings.streamEndpoint;
+      playerStateStream = _jaPlayer.playerStateStream.map((event) => PlayerState.fromJA(event)).asBroadcastStream();
     }
   
   /// dispose underlying resources
@@ -36,17 +38,11 @@ class AudioPlayer {
     await _jaPlayer.dispose();
   }
 
-  Stream<ja.PlayerState> get playerStateStream => _jaPlayer.playerStateStream;
+  late final Stream<PlayerState> playerStateStream;
   Stream<double> get volumeStream => _jaPlayer.volumeStream;
 
   final ja.AudioPlayer _jaPlayer; // underlying implementation player
   StreamEndpoint? _endpoint; // the current endpoint that is being played.
-
-  // if cachingPause is enabled, this is used to fast-forward the stream when resuming.
-  // this was originally needed because Just Audio's native backends have very long load times,
-  // but the Media Kit backend is very fast.
-  final _pauseWatch = Stopwatch();
-  Duration? _pausePos;
 
   StreamEndpoint? get endpoint => _endpoint;
 
@@ -54,10 +50,6 @@ class AudioPlayer {
     // early exit if value is null or the endpoint isn't actually being changed.
     if (_endpoint == value || value == null) return;
     _endpoint = value;
-    // the pause information will be invalid after switch endpoints, because the underlying player "resets"
-    _pausePos = null;
-    _pauseWatch.stop();
-    _pauseWatch.reset();
 
     // update audio source, then log result.
     _updateAudioSource().then((result) => result
@@ -79,36 +71,18 @@ class AudioPlayer {
   /// On a livestream, this should never resolve.
   /// In otherwords, this resolving should signal an error (such as connection dropped, or the broadcast server goes down)
   Future<void> play() async {
-    // pausePos != null means cachingPause is enabled. So we seek to the "head" of the stream,
-    // which is calculated based on where the head was when it was paused and how long it has been.
-    if (_pausePos != null) {
-      await _jaPlayer.seek(_pausePos! + _pauseWatch.elapsed);
-      _pausePos = null;
-      _pauseWatch.stop();
-      _pauseWatch.reset();
-    }
-
+    // seek to the head of the livestream. 
+    // by default, JustAudio attempts to seek to the last play position after both stop and pause.
+    // MVP player does not allow seeks on livestreams, so this cancels JustAudio's seek attempt.
+    _jaPlayer.seek(null);
     return _jaPlayer.play();
   }
 
-  Future<void> stop() async {
-    await _jaPlayer.stop();
-    _pausePos = null;
-    _pauseWatch.stop();
-    _pauseWatch.reset();
-  }
-
-  Future<void> pause() async {
-    await _jaPlayer.pause();
-    _pausePos = _jaPlayer.position;
-    _pauseWatch.reset();
-    _pauseWatch.start();
-  }
+  Future<void> stop() => _jaPlayer.stop();
+  Future<void> pause() => _jaPlayer.pause();
 
   /// Either pause or stop the stream, depending on app_settings.cachingPause
-  Future<void> pauseOrStop() async {
-    app_settings.cachingPause ? await pause() : await stop();
-  }
+  Future<void> pauseOrStop() => app_settings.cachingPause ? pause() : stop();
 
   /// updates the audio source for the underlying audio player.
   AsyncResult<Unit> _updateAudioSource() async {
@@ -121,7 +95,12 @@ class AudioPlayer {
     await stop();
     try {
 
-      await _jaPlayer.setAudioSource(ja.AudioSource.uri(_endpoint!.uri), preload: false);
+      await _jaPlayer.setAudioSource(
+        ja.AudioSource.uri(_endpoint!.uri), 
+        initialIndex: 0,
+        initialPosition: Duration.zero,
+        preload: false,
+      );
 
     } on ja.PlayerException catch (e) {
       return Failure(Exception('Player error ${e.code}: ${e.message}'));

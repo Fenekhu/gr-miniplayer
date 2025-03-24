@@ -7,7 +7,7 @@ import 'package:gr_miniplayer/data/repository/user_data.dart';
 import 'package:gr_miniplayer/data/service/hidden_art_list.dart';
 import 'package:gr_miniplayer/data/service/info_websocket.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
-import 'package:gr_miniplayer/domain/player_state.dart';
+import 'package:gr_miniplayer/domain/player_state_coordinator.dart';
 import 'package:gr_miniplayer/domain/rating_favorite_bridge.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_model.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_view.dart';
