@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
 import 'package:window_manager/window_manager.dart';
-import 'package:screen_retriever/screen_retriever.dart';
+//import 'package:screen_retriever/screen_retriever.dart';
 
 /// a listener that saves window size and position information to settings in response to events.
 class WindowListenerImpl with WindowListener {
@@ -34,13 +34,14 @@ const _listener = WindowListenerImpl();
 Future<void> setupWindow() async {
   await windowManager.ensureInitialized();
 
-  Display display = await screenRetriever.getPrimaryDisplay(); // needed to get the display's scale factor. may be always null on macos.
+  // removed because this issue only affects debug mode?
+  //Display display = await screenRetriever.getPrimaryDisplay(); // needed to get the display's scale factor. may be always null on macos.
 
   // I've noticed scale-factor awareness behaves differently in debug/release mode.
   // debug: positioned right, sized wrong
   // release: positioned wrong, sized right
   WindowOptions windowOptions = WindowOptions(
-    size: app_settings.windowSize * (display.scaleFactor?.toDouble() ?? 1),
+    size: app_settings.windowSize /* * (display.scaleFactor?.toDouble() ?? 1)*/,
     skipTaskbar: false, // if true, the titlebar size will be added to the window size, causing it to grow with every launch
     titleBarStyle: TitleBarStyle.hidden, // hides titlebar and buttons in windows
     windowButtonVisibility: false, // hides titlebar and buttons in macos and linux
