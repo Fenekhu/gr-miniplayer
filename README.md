@@ -15,8 +15,8 @@ Contents:
     - [Stream Quality](#stream-quality)
     - [Advanced Settings](#advanced-settings)
       - [Art Quality](#art-quality)
+      - [Default Window Size](#default-window-size)
       - [Caching Pause](#caching-pause)
-      - [TODO: Default Window Size](#todo-default-window-size)
   - [Build](#build)
     - [Linux](#linux)
 
@@ -59,7 +59,7 @@ These additional settings are currently only available directly through editting
 | MacOS | NSUserDefaults |
 | Windows | Roaming AppData |
 
-From there, it will most likely be in `com.fenekhu/gr_miniplayer/shared_preferences.json`.
+From there, it will most likely be in `com.fenekhu/Gensokyo Radio Miniplayer/shared_preferences.json`.
 
 #### Art Quality
 
@@ -69,6 +69,14 @@ Key: `art.quality`
 Values: `string`: `500` (default), `200`, `100`, `40`  
 Example: `"art.quality": "500"`  
 
+#### Default Window Size
+
+The default window size to reset to after presing the Reset Window Size button in settings.
+
+Key: `window.defaultWidth`, `window.defaultHeight`  
+Values: `double`  
+Example: `"window.defaultWidth": 288.0, "window.defaultHeight": 416.0`
+
 #### Caching Pause
 
 When true, pausing the player will stop the audio output, but continue receiving audio stream data, as if the audio had been muted instead of stopped. This can decrease loading time when playing after stopping, but is not recommended, as it maintains a connection to the station when not actively listening.  
@@ -77,16 +85,6 @@ This option is not tested, use at your own risk. The station may flag you as a i
 Key: `player.cachingPause`  
 Values: `bool`: `true`, `false` (default)  
 Example: `"player.cachingPause": false`
-
-#### TODO: Default Window Size
-
-The default window size to reset to after presing the Reset Window Size button in settings.
-
-NOTE: This is not yet implemented.
-
-Key: `window.defaultWidth`, `window.defaultHeight`  
-Values: `double`  
-Example: `"window.defaultWidth": 288.0, "window.defaultHeight": 416.0`
 
 ## Build
 

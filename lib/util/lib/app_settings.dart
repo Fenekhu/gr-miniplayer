@@ -71,8 +71,8 @@ class StringListProperty {
 
 const _windowXProp = DoubleProperty('window.x', 0);
 const _windowYProp = DoubleProperty('window.y', 0);
-const _windowWidthProp = DoubleProperty('window.width', 288);
-const _windowHeightProp = DoubleProperty('window.height', 416);
+const _defWindowWidthProp = DoubleProperty('window.defaultWidth', 288);
+const _defWindowHeightProp = DoubleProperty('window.defaultHeight', 416);
 
 const _artQualityProp = StringProperty('art.quality', '500');
 const _streamEndpointProp = StringProperty('stream.endpoint', '2');
@@ -80,24 +80,34 @@ const _streamEndpointProp = StringProperty('stream.endpoint', '2');
 const _volumeProp = DoubleProperty('player.volume', 1);
 const _cachingPauseProp = BoolProperty('player.cachingPause', false);
 
-final Offset defaultWindowPos = Offset(_windowXProp.defaultValue, _windowYProp.defaultValue);
-final Size defaultWindowSize = Size(_windowWidthProp.defaultValue, _windowHeightProp.defaultValue);
-
 double get windowX => _windowXProp.value;
 set windowX(double v) => _windowXProp.value = v;
 
 double get windowY => _windowYProp.value;
 set windowY(double v) => _windowYProp.value = v;
 
-double get windowWidth => _windowWidthProp.value;
-set windowWidth(double v) => _windowWidthProp.value = v;
+double get defaultWindowWidth => _defWindowWidthProp.value;
+set defaultWindowWidth(double v) => _defWindowWidthProp.value = v;
 
-double get windowHeight => _windowHeightProp.value;
-set windowHeight(double v) => _windowHeightProp.value = v;
+double get defaultWindowHeight => _defWindowHeightProp.value;
+set defaultWindowHeight(double v) => _defWindowHeightProp.value = v;
+
+// window width and window height require special functionality because the default value is not constant.
+double get windowWidth => sharedPrefs.getDouble('window.width') ?? defaultWindowWidth;
+set windowWidth(double v) => sharedPrefs.setDouble('window.width', v);
+
+double get windowHeight => sharedPrefs.getDouble('window.height') ?? defaultWindowHeight;
+set windowHeight(double v) => sharedPrefs.setDouble('window.height', v);
+
+final Offset defaultWindowPos = Offset(_windowXProp.defaultValue, _windowYProp.defaultValue);
 
 /// wraps windowX and windowY as an Offset
 Offset get windowPos => Offset(windowX, windowY);
 set windowPos(Offset v) { windowX = v.dx; windowY = v.dy; }
+
+/// wraps defaultWindowWidth and defaultWindowHeight as a Size
+Size get defaultWindowSize => Size(defaultWindowWidth, defaultWindowHeight);
+set defaultWindowSize(Size v) { defaultWindowWidth = v.width; defaultWindowHeight = v.height; }
 
 /// wraps windowWidth and windowHeight as a Size
 Size get windowSize => Size(windowWidth, windowHeight);
