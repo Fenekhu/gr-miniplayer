@@ -1,9 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// wraps and caches the file that stores the list of albums who's art should be hidden.
 class HiddenArtList {
+  final StreamController<ArtHidingStatus> _artHidingUpdatesController = StreamController.broadcast();
+
+  Stream<ArtHidingStatus> get artHidingStatusStream => _artHidingUpdatesController.stream;
+
   Set<String>? _cachedList;
 
   Future<File> get _file async {
@@ -23,9 +29,34 @@ class HiddenArtList {
   }
 
   /// Writes the current list to disk. 
-  /// Optionally, [flush] waits for the contents to be written to resolve the future.
-  Future<File> write({bool flush = false}) async {
+  Future<File> _write() async {
     final contents = (await list).join('\n'); // join the list as one albumID per line
-    return (await _file).writeAsString(contents, flush: flush);
+    return (await _file).writeAsString(contents);
+  }
+
+  Future<void> dispose() async {
+    await _artHidingUpdatesController.close();
+  }
+
+  /// see dart Set.contains
+  Future<bool> contains(String albumID) async {
+    if (albumID == '0') return false; // never hide undefined art.
+    return (await list).contains(albumID);
+  }
+
+  /// see dart Set.add
+  Future<void> add(String albumID) async {
+    if ((await list).add(albumID)) { // if changes were actually made to the list
+      _artHidingUpdatesController.add(ArtHidingStatus(albumID, true)); // emit stream event
+      await _write(); // write changes to disk
+    }
+  }
+
+  /// see dart Set.remove
+  Future<void> remove(String albumID) async {
+    if ((await list).remove(albumID)) { // if changes were actually made to the list
+      _artHidingUpdatesController.add(ArtHidingStatus(albumID, false)); // emit stream event
+      await _write(); // write changes to disk
+    }
   }
 }

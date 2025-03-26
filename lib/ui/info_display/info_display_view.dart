@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr_miniplayer/domain/song_info.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:gr_miniplayer/ui/info_display/info_display_model.dart';
 import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 import 'package:marquee/marquee.dart';

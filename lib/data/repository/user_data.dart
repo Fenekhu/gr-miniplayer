@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:gr_miniplayer/util/exceptions.dart';
 import 'package:gr_miniplayer/util/lib/shared_prefs.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
 import 'package:result_dart/result_dart.dart';
@@ -8,19 +9,19 @@ import 'package:result_dart/result_dart.dart';
 // Those stored values only need to be accessed from this file, so its okay to put them here like this.
 
 String _getStored(String key) => sharedPrefs.containsKey(key) ? sharedPrefs.getString(key) ?? '' : '';
-void _setStored(String key, String value) => sharedPrefs.setString(key, value);
+Future<void> _setStored(String key, String value) => sharedPrefs.setString(key, value);
 
 String _getStoredUserID() => _getStored('user.id');
-void _setStoredUserID(String userID) => _setStored('user.id', userID);
+Future<void> _setStoredUserID(String userID) => _setStored('user.id', userID);
 
 String _getStoredUsername() => _getStored('user.name');
-void _setStoredUsername(String username) => _setStored('user.name', username);
+Future<void> _setStoredUsername(String username) => _setStored('user.name', username);
 
 String _getStoredAsi() => _getStored('user.asi');
-void _setStoredAsi(String asi) => _setStored('user.asi', asi);
+Future<void> _setStoredAsi(String asi) => _setStored('user.asi', asi);
 
 String _getStoredApiKey() => _getStored('user.apiKey');
-void _setStoredApiKey(String apiKey) => _setStored('user.apiKey', apiKey);
+Future<void> _setStoredApiKey(String apiKey) => _setStored('user.apiKey', apiKey);
 
 /// Represents the current user session information (as returned from the login API).
 class UserSessionData {
@@ -37,11 +38,13 @@ class UserSessionData {
   bool get isLoggedIn => asi.isNotEmpty;
 
   /// stores this session information to persistent storage.
-  void store() {
-    _setStoredUserID(userID);
-    _setStoredUsername(username);
-    _setStoredAsi(asi);
-    _setStoredApiKey(apiKey);
+  Future<void> store() async {
+    await Future.wait([ // allows these to happen in any order/"simultaneously"
+      _setStoredUserID(userID),
+      _setStoredUsername(username),
+      _setStoredAsi(asi),
+      _setStoredApiKey(apiKey),
+    ]);
   }
 }
 
@@ -94,6 +97,14 @@ class UserResources {
 
   set needsLoginPage(bool value) => _needsLoginPageController.add(value);
 
+  Future<void> dispose() async {
+    await Future.wait([
+      _needsLoginPageController.close(),
+      _userDataStreamController.close(),
+      _ratingFavoriteStreamController.close(),
+    ]);
+  }
+
   /// Logs in with the given credentials.
   AsyncResult<Unit> login(String username, String password) async {
     // As the station's API is not well documented and is subject to change,
@@ -110,15 +121,15 @@ class UserResources {
     //     store the asi and api key for persistent sessions.
     //     transform it into a UserSessionData object.
     //     add it to the user data state stream
-    return result
-      .map((lr) {
-        var userData = UserSessionData(
+    return result.toAsyncResult()
+      .map((lr) async {
+        final userData = UserSessionData(
           userID: lr.userID, 
           username: lr.username, 
           asi: lr.asi, 
           apiKey: lr.apiKey,
         );
-        userData.store();
+        await userData.store();
         _userDataStreamController.add(userData);
         return unit;
       });
@@ -126,9 +137,9 @@ class UserResources {
   }
 
   /// Logs out, clearing all user information.
-  void logout() {
-    var userData = UserSessionData.empty();
-    userData.store();
+  Future<void> logout() async {
+    final userData = UserSessionData.empty();
+    await userData.store();
     _userDataStreamController.add(userData);
     // rating and favorite status will be updated by RatingFavoriteBridge in response to data on the userDataStream
   }
@@ -172,10 +183,10 @@ class UserResources {
   }
 
   AsyncResult<Unit> submitRating(String songID, int rating) async {
-    // early exit if rating is an invalid value somehow
-    if (rating < 1 || rating > 5) return Failure(Exception('rating $rating outside valid range'));
+    // throw if rating is an invalid value somehow
+    if (rating < 1 || rating > 5) throw RangeError.range(rating, 1, 5, 'rating');
     // early exit if not logged in.
-    if (_getStoredAsi().isEmpty) return Failure(Exception('Must be logged in to rate songs'));
+    if (_getStoredAsi().isEmpty) return Failure(NotLoggedInException('Must be logged in to rate songs'));
     // early exit if rating already submitted or rating matches current rating.
     if ((_lastSubmittedRatingSongID == songID && _lastSubmittedRatingScore == rating) 
       || _cachedRatingFavoriteStatus.rating == rating) {
@@ -195,7 +206,7 @@ class UserResources {
       result = Failure(e);
     }
 
-    // process the succesful result, transforming it into a RatingFavoriteStatus object.
+    // emit the updated status to the stream
     return result.onSuccess((_) {
       _cachedRatingFavoriteStatus = RatingFavoriteStatus(
         rating: rating, 
@@ -209,7 +220,7 @@ class UserResources {
   /// favorites a song if not favorited, or unfavorites a song if favorited.
   AsyncResult<Unit> toggleFavorite(String songID) async {
     // early exit if not logged in.
-    if (_getStoredAsi().isEmpty) return Failure(Exception('Must be logged in to favorite/unfavorite songs'));
+    if (_getStoredAsi().isEmpty) return Failure(NotLoggedInException('Must be logged in to favorite/unfavorite songs'));
     // early exit if the request has already been sent once
     if (_lastSubmittedFavoriteSongID == songID && _lastSubmittedFavoriteState == _cachedRatingFavoriteStatus.favorite) return Success(unit);
 

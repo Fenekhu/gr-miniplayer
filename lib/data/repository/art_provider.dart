@@ -21,7 +21,7 @@ class ArtProvider {
   /// Loads and caches the given network URL path.
   /// Pass an empty string to get the placeholder art.
   /// Will also return placeholder art if loading fails.
-  Image load(String path) {
+  Image get(String path) {
     // if the image to load is not the same as the cached one, update the cache
     if (path != _cachedImagePath) {
       log('loading new image: $path', name: 'Art Provider');

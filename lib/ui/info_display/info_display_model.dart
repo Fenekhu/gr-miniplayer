@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
-import 'package:gr_miniplayer/domain/song_info.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 
 class InfoDisplayModel {
   InfoDisplayModel({required SongInfoRepo songInfoRepo}) : 

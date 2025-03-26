@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:gr_miniplayer/util/exceptions.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/json_util.dart' as json_util;
 import 'package:http/http.dart' as http;
@@ -35,7 +36,7 @@ class StationApiClient {
   // most API endpoints responses look like {'RESULT':'SUCCESS', ...}
   /// Processes a response, checking that the RESULT field was SUCCESS, returning a failure if not.
   /// Returns the response body if successful.
-  AsyncResult<Map<String, dynamic>> _checkGenericResponse(http.Response response, {int expectedCode = 200}) async {
+  Result<Map<String, dynamic>> _checkGenericResponse(http.Response response, {int expectedCode = 200}) {
     // process response
     if (response.statusCode == expectedCode) {
       final body = json_util.unwrapJson(response.body);
@@ -44,10 +45,10 @@ class StationApiClient {
       if (result?.toLowerCase() == 'success') {
         return Success(body);
       } else {
-        return Failure(Exception('unsuccessful: ${body['ERROR'] ?? 'unknown error'}'));
+        return Failure(BadServerResultException.fromBody(body));
       }
     } else {
-      return Failure(Exception('unexpected response code: ${response.statusCode}'));
+      return Failure(BadResponseCodeException(response));
     }
   }
 
@@ -71,7 +72,7 @@ class StationApiClient {
     return _checkGenericResponse(response).flatMap((body) {
       final asi = body['APPSESSIONID']?.toString();
       if (asi == null) {
-        return Failure(Exception('response did not contain an ASI'));
+        return Failure(InvalidResponseException('response did not contain an ASI', body));
       } else { // if it is, construct an API response.
         return Success(LoginResponse(
           userID: body['USERID']?.toString() ?? '', // may be sent as a string or an int. int is not assignable to String. 

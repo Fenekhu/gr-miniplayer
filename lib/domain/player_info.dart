@@ -1,5 +1,50 @@
-import 'package:gr_miniplayer/domain/song_info.dart';
 import 'package:just_audio/just_audio.dart' as ja;
+
+/// All the information about a song usually given from the live info websocket.
+class SongInfo {
+  final String songID;
+  final String title;
+  final String artist;
+  final String albumID;
+  final String album;
+  final String circle;
+  final int    year;
+  final String albumArt;
+  final int    duration;
+  final int    played;
+  final int    remaining;
+
+  const SongInfo({
+    required this.songID, 
+    required this.title, 
+    required this.artist, 
+    required this.albumID, 
+    required this.album, 
+    required this.circle, 
+    required this.year, 
+    required this.albumArt, 
+    required this.duration, 
+    required this.played, 
+    required this.remaining,
+  });
+}
+
+/// represents all data needed to display the m:ss --------------- m:ss bar
+class ProgressStatus {
+  final String elapsed;
+  final String total;
+  final double value;
+
+  const ProgressStatus({required this.elapsed, required this.total, required this.value});
+}
+
+/// represents whether a specific album is hidden or not.
+class ArtHidingStatus {
+  final String albumID;
+  final bool hide;
+
+  const ArtHidingStatus(this.albumID, this.hide);
+}
 
 // Copying the JustAudio enum so that other files are not dependent on JustAudio.
 /// Enumerates the different processing states of a player.

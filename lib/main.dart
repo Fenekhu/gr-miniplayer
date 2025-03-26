@@ -37,18 +37,29 @@ void main() async {
           create: (context) => InfoWebsocket(),
           dispose: (context, value) => value.dispose(),
         ),
-        Provider(create: (context) => HiddenArtList()),
+        Provider(
+          create: (context) => HiddenArtList(),
+          dispose: (context, value) => value.dispose(),
+        ),
 
-        Provider(create: (context) => UserResources(
-          apiClient: context.read(),
-        )),
-        Provider(create: (context) => SongInfoRepo(
-          infoWebsocket: context.read(), 
-          hiddenArtList: context.read(),
-        )),
-        Provider(create: (context) => HiddenArtManager(
-          listService: HiddenArtList(),
-        )),
+        Provider(
+          create: (context) => UserResources(
+            apiClient: context.read(),
+          ),
+          dispose: (context, value) => value.dispose(),
+        ),
+        Provider(
+          create: (context) => SongInfoRepo(
+            infoWebsocket: context.read(), 
+            hiddenArtList: context.read(),
+          ),
+          dispose: (context, value) => value.dispose(),
+        ),
+        Provider(
+          create: (context) => HiddenArtManager(
+            listService: HiddenArtList(),
+          ),
+        ),
         Provider(
           create: (context) => AudioPlayer(),
           dispose: (context, value) => value.dispose(),
@@ -57,10 +68,13 @@ void main() async {
           create: (context) => ArtProvider(),
         ),
 
-        Provider(create: (context) => PlayerStateCoordinator(
-          audioPlayer: context.read(), 
-          songInfoRepo: context.read(),
-        )),
+        Provider(
+          create: (context) => PlayerStateCoordinator(
+            audioPlayer: context.read(), 
+            songInfoRepo: context.read(),
+          ),
+          dispose: (context, value) => value.dispose(),
+        ),
         Provider(
           create: (context) => RatingFavoriteBridge(
             songInfoRepo: context.read(), 

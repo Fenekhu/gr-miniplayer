@@ -1,4 +1,5 @@
 import 'package:gr_miniplayer/data/service/hidden_art_list.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 
 /// CRUD operations wrapping the list of album IDs who's art should be hidden.
 class HiddenArtManager {
@@ -6,21 +7,18 @@ class HiddenArtManager {
     : _listService = listService;
 
   final HiddenArtList _listService;
+  Stream<ArtHidingStatus> get artHidingStatusStream => _listService.artHidingStatusStream;
 
-  /// see dart Set.contains
-  Future<bool> contains(String albumID) async {
-    return (await _listService.list).contains(albumID);
-  }
+  Future<bool> contains(String albumID) => _listService.contains(albumID);
 
-  /// see dart Set.add
-  Future<void> add(String albumID, {bool write = true}) async {
-    (await _listService.list).add(albumID);
-    if (write) await _listService.write(); // write changes to disk
-  }
+  /// hides the art and emits an event to the stream.
+  /// does nothing if the art is already hidden.
+  Future<void> hide(String albumID) => _listService.add(albumID);
 
-  /// see dart Set.remove
-  Future<void> remove(String albumID, {bool write = true}) async {
-    (await _listService.list).remove(albumID);
-    if (write) await _listService.write(); // write changes to disk
-  }
+  /// shows the art and emits an event to the stream.
+  /// does nothing of the art is already shown.
+  Future<void> show(String albumID) => _listService.remove(albumID);
+
+  /// toggles the art's visibility and emits an event to the stream.
+  Future<void> toggle(String albumID) async => (await _listService.contains(albumID))? show(albumID) : hide(albumID);
 }

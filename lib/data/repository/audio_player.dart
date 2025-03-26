@@ -1,7 +1,7 @@
-import 'dart:developer' as developer;
+import 'dart:developer' show log;
 import 'dart:ui';
 
-import 'package:gr_miniplayer/domain/player_state.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:gr_miniplayer/util/enum/stream_endpoint.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
@@ -34,9 +34,7 @@ class AudioPlayer {
     }
   
   /// dispose underlying resources
-  void dispose() async {
-    await _jaPlayer.dispose();
-  }
+  Future<void> dispose() => _jaPlayer.dispose();
 
   late final Stream<PlayerState> playerStateStream;
   Stream<double> get volumeStream => _jaPlayer.volumeStream;
@@ -54,27 +52,25 @@ class AudioPlayer {
     // update audio source, then log result.
     _updateAudioSource().then((result) => result
       .onFailure((e) {
-        developer.log('Error updating audio source', time: DateTime.now(), name: 'Audio Player', error: e);
+        log('Error updating audio source', time: DateTime.now(), name: 'Audio Player', error: e);
       })
       .onSuccess((_) {
         String? path = (_jaPlayer.audioSource as ja.UriAudioSource?)?.uri.path;
-        developer.log('Set endpoint to $path}', time: DateTime.now(), name: 'Audio Player');
+        log('Set endpoint to $path', time: DateTime.now(), name: 'Audio Player');
       })
     );
   }
 
-  set volume(double value) {
-    _jaPlayer.setVolume(value);
-  }
+  set volume(double value) => _jaPlayer.setVolume(value);
 
   /// This won't resolve until content finishes playing.
   /// On a livestream, this should never resolve.
   /// In otherwords, this resolving should signal an error (such as connection dropped, or the broadcast server goes down)
   Future<void> play() async {
-    // seek to the head of the livestream. 
-    // by default, JustAudio attempts to seek to the last play position after both stop and pause.
-    // MVP player does not allow seeks on livestreams, so this cancels JustAudio's seek attempt.
-    _jaPlayer.seek(null);
+    // seek to the head of the livestream then play.
+    // by default, JustAudio attempts to seek to the last play position after resuming from both stop and pause.
+    // MVP player does not allow seeks on livestreams, so seek(null) cancels JustAudio's seek attempt.
+    await _jaPlayer.seek(null);
     return _jaPlayer.play();
   }
 
@@ -86,12 +82,16 @@ class AudioPlayer {
 
   /// updates the audio source for the underlying audio player.
   AsyncResult<Unit> _updateAudioSource() async {
+    // originally this returned a failure with a special exception,
+    // but this should never happen. If it does, that would signal a programming error
+    // that needs to be fixed. This may happen if the user tampers with the value
+    // stored in shared_preferences.json, but they can crash the program if they choose to.
     if (_endpoint == null) {
-      return Failure(Exception('Endpoint is null'));
+      throw StateError('_endpoint was null');
     }
 
     // store whether the player was playing so we can resume after switching.
-    bool wasPlaying = _jaPlayer.playing;
+    final bool wasPlaying = _jaPlayer.playing;
     await stop();
     try {
 
@@ -102,12 +102,8 @@ class AudioPlayer {
         preload: false,
       );
 
-    } on ja.PlayerException catch (e) {
-      return Failure(Exception('Player error ${e.code}: ${e.message}'));
-    } on ja.PlayerInterruptedException catch (e) {
-      return Failure(Exception('Player interrupted: ${e.message}'));
-    } catch (e) {
-      return Failure(Exception('Player error unknown: $e'));
+    } on Exception catch (e) {
+      return Failure(e);
     }
 
     if (wasPlaying) play();

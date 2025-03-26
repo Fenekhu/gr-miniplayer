@@ -1,10 +1,11 @@
-
 import 'dart:async';
-import 'dart:developer';
+import 'dart:developer' show log;
 
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
 import 'package:gr_miniplayer/data/repository/user_data.dart';
-import 'package:gr_miniplayer/domain/song_info.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
+import 'package:gr_miniplayer/util/exceptions.dart';
+import 'package:result_dart/result_dart.dart';
 
 /// Bridge to trigger a rating/favorite status update when a new song comes.
 class RatingFavoriteBridge {
@@ -37,16 +38,22 @@ class RatingFavoriteBridge {
     if (_songID != null) _userResources.updateRatingAndFavoriteStatus(_songID!);
   }
 
-  void dispose() {
-    _infoStreamSubscription.cancel();
-    _userDataStreamSubscription.cancel();
+  Future<void> dispose() async {
+    await Future.wait([ // allows operations to happen "simultaneously"
+      _infoStreamSubscription.cancel(),
+      _userDataStreamSubscription.cancel(),
+    ]);
   }
 
-  Future<void> setRating(int rating) async {
-    if (_songID != null) await _userResources.submitRating(_songID!, rating);
+  /// throws `MissingSongIDException` if applicable
+  AsyncResult<Unit> setRating(int rating) async {
+    if (_songID != null) return _userResources.submitRating(_songID!, rating);
+    return Failure(MissingSongIDException());
   }
 
-  Future<void> toggleFavorite() async {
+  /// throws `MissingSongIDException` if applicable
+  AsyncResult<Unit> toggleFavorite() async {
     if (_songID != null) await _userResources.toggleFavorite(_songID!);
+    return Failure(MissingSongIDException());
   }
 }
