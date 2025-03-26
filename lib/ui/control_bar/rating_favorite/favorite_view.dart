@@ -14,13 +14,13 @@ class FavoriteView extends StatelessWidget {
       width: app_style.controlIconBoxSize,
       height: app_style.controlIconBoxSize,
       child: StreamBuilder<UserSessionData>(
-        stream: viewModel.bridge.userDataStream, // respond to changes in login status
+        stream: viewModel.userDataStream, // respond to changes in login status
         initialData: UserSessionData.fromStorage(),
         builder: (context, snapshot0) {
           final bool isLoggedIn = snapshot0.data?.asi.isNotEmpty ?? false;
         
           return StreamBuilder<RatingFavoriteStatus>(
-            stream: viewModel.bridge.ratingFavoriteStream, // respond to changes in song favorite status
+            stream: viewModel.ratingFavoriteStream, // respond to changes in song favorite status
             initialData: RatingFavoriteStatus.empty(),
             builder: (context, snapshot1) {
               final bool favorited = isLoggedIn && (snapshot1.data?.favorite ?? false);
@@ -30,7 +30,7 @@ class FavoriteView extends StatelessWidget {
                 iconSize: app_style.controlIconSize,
                 padding: const EdgeInsets.all(0),
                 tooltip: isLoggedIn? null : 'Log in to favorite',
-                onPressed: isLoggedIn? viewModel.bridge.toggleFavorite : null, 
+                onPressed: isLoggedIn? viewModel.toggleFavorite : null, 
               );
             }
           );

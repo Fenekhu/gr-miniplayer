@@ -19,7 +19,7 @@ class RatingView extends StatelessWidget {
       width: app_style.controlIconBoxSize,
       height: app_style.controlIconBoxSize,
       child: StreamBuilder<RatingFavoriteStatus>(
-        stream: viewModel.bridge.ratingFavoriteStream, // respond to changes in song rating status
+        stream: viewModel.ratingFavoriteStream, // respond to changes in song rating status
         initialData: RatingFavoriteStatus.empty(),
         builder: (context, snapshot0) {
           final int rating = snapshot0.data?.rating ?? 0;
@@ -54,7 +54,7 @@ class RatingView extends StatelessWidget {
                         color: rating >= i? starColor : null, // color the star if number <= rating
                         iconSize: app_style.controlIconSize,
                         padding: const EdgeInsets.all(0), // prevent default 8.0 padding
-                        onPressed: () => viewModel.bridge.setRating(i), 
+                        onPressed: () => viewModel.setRating(i), 
                       ),
                     ),
                     IgnorePointer( // text overlay
@@ -70,7 +70,7 @@ class RatingView extends StatelessWidget {
               alignment: AlignmentDirectional.center,
               children: [
                 StreamBuilder<UserSessionData>(
-                  stream: viewModel.bridge.userDataStream,  // respond to changes in login status
+                  stream: viewModel.userDataStream,  // respond to changes in login status
                   initialData: UserSessionData.fromStorage(),
                   builder: (context, snapshot1) {
                     final bool isLoggedIn = snapshot1.data?.asi.isNotEmpty ?? false;

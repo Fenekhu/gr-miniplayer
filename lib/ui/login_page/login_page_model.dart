@@ -20,8 +20,8 @@ class LoginPageModel extends ChangeNotifier {
   Future<void> login(String username, String password) async {
     await _userResources.login(username, password)
       .onSuccess((_) => close()) // close page on successful login
-      .onFailure((e) { // otherwise display just the message of the error (will be in form 'Exception: unsuccessful: message')
-        error = e.toString().replaceAll(RegExp(r'(Exception: )|(unsuccessful: )'), '');
+      .onFailure((e) { // otherwise display the error
+        error = e.toString();//.replaceAll(RegExp(r'(Exception: )|(unsuccessful: )'), '');
         notifyListeners();
       });
   }

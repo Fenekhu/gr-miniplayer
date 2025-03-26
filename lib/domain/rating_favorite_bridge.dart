@@ -5,6 +5,7 @@ import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
 import 'package:gr_miniplayer/data/repository/user_data.dart';
 import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:gr_miniplayer/util/exceptions.dart';
+import 'package:gr_miniplayer/util/extensions/result_ext.dart';
 import 'package:result_dart/result_dart.dart';
 
 /// Bridge to trigger a rating/favorite status update when a new song comes.
@@ -30,12 +31,12 @@ class RatingFavoriteBridge {
   Stream<UserSessionData> get userDataStream => _userResources.userDataStream;
 
   void _onSongInfo(SongInfo info) {
-    _userResources.updateRatingAndFavoriteStatus(info.songID);
+    _userResources.updateRatingAndFavoriteStatus(info.songID).logOnFailure('Rating Favorite Bridge');
   }
 
   void _onUserData(UserSessionData data) {
     log('onUserData: ${data.username}', name: 'Rating Favorite Bridge');
-    if (_songID != null) _userResources.updateRatingAndFavoriteStatus(_songID!);
+    if (_songID != null) _userResources.updateRatingAndFavoriteStatus(_songID!).logOnFailure('Rating Favorite Bridge');
   }
 
   Future<void> dispose() async {
@@ -47,13 +48,14 @@ class RatingFavoriteBridge {
 
   /// throws `MissingSongIDException` if applicable
   AsyncResult<Unit> setRating(int rating) async {
-    if (_songID != null) return _userResources.submitRating(_songID!, rating);
-    return Failure(MissingSongIDException());
+    if (_songID == null) return Failure(MissingSongIDException());
+    return _userResources.submitRating(_songID!, rating);
+    
   }
 
   /// throws `MissingSongIDException` if applicable
   AsyncResult<Unit> toggleFavorite() async {
-    if (_songID != null) await _userResources.toggleFavorite(_songID!);
-    return Failure(MissingSongIDException());
+    if (_songID == null) return Failure(MissingSongIDException());
+    return _userResources.toggleFavorite(_songID!);
   }
 }

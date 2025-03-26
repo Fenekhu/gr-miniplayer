@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:gr_miniplayer/util/enum/stream_endpoint.dart';
+import 'package:gr_miniplayer/util/extensions/result_ext.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/app_settings.dart' as app_settings;
 import 'package:just_audio/just_audio.dart' as ja;
@@ -50,15 +51,12 @@ class AudioPlayer {
     _endpoint = value;
 
     // update audio source, then log result.
-    _updateAudioSource().then((result) => result
-      .onFailure((e) {
-        log('Error updating audio source', time: DateTime.now(), name: 'Audio Player', error: e);
-      })
+    _updateAudioSource()
+      .logOnFailure('Audio Player')
       .onSuccess((_) {
         String? path = (_jaPlayer.audioSource as ja.UriAudioSource?)?.uri.path;
         log('Set endpoint to $path', time: DateTime.now(), name: 'Audio Player');
-      })
-    );
+      });
   }
 
   set volume(double value) => _jaPlayer.setVolume(value);
