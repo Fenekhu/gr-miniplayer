@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:gr_miniplayer/data/repository/art_provider.dart';
+import 'package:gr_miniplayer/data/repository/art_cache.dart';
 import 'package:gr_miniplayer/data/repository/audio_player.dart';
 import 'package:gr_miniplayer/data/repository/hidden_art_manager.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
 import 'package:gr_miniplayer/data/repository/user_data.dart';
+import 'package:gr_miniplayer/data/service/audio_service_smtc.dart';
 import 'package:gr_miniplayer/data/service/hidden_art_list.dart';
 import 'package:gr_miniplayer/data/service/info_websocket.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
-import 'package:gr_miniplayer/domain/player_state_coordinator.dart';
+import 'package:gr_miniplayer/domain/audio_service_handler.dart';
 import 'package:gr_miniplayer/domain/rating_favorite_bridge.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_model.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_view.dart';
@@ -19,10 +20,12 @@ import 'package:gr_miniplayer/util/lib/window_utils.dart' as window_utils;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await shared_prefs.ensureInitialized();
+  await AudioServiceSmtc.ensureInitialized();
   await AudioPlayer.ensureInitialized();
+  await MyAudioServiceHandler.initialize();
   await window_utils.setupWindow();
 
   runApp(
@@ -65,16 +68,9 @@ void main() async {
           dispose: (context, value) => value.dispose(),
         ),
         Provider(
-          create: (context) => ArtProvider(),
+          create: (context) => ArtCache(),
         ),
 
-        Provider(
-          create: (context) => PlayerStateCoordinator(
-            audioPlayer: context.read(), 
-            songInfoRepo: context.read(),
-          ),
-          dispose: (context, value) => value.dispose(),
-        ),
         Provider(
           create: (context) => RatingFavoriteBridge(
             songInfoRepo: context.read(), 
@@ -117,9 +113,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<SongInfoRepo>().connect(retryDelay: null));
-    context.read<PlayerStateCoordinator>();
-    context.read<RatingFavoriteBridge>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RatingFavoriteBridge>();
+      MyAudioServiceHandler.instance
+        ..setArtCache(context.read())
+        ..setPlayer(context.read())
+        ..setSongInfoRepo(context.read());
+      context.read<SongInfoRepo>().connect(retryDelay: null);
+    });
   }
 
   @override

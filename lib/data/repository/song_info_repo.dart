@@ -22,7 +22,7 @@ class SongInfoRepo {
     infoStream = infoWebsocket.infoStream.map(_onData).asBroadcastStream();
     // create a stream that emits a new progress status every second.
     progressStream = Stream<ProgressStatus>.periodic(
-      Duration(seconds: 1),
+      const Duration(seconds: 1),
       (_) {
         final duration = latestInfo?.duration ?? 0;
         final ret = ProgressStatus(
