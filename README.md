@@ -46,7 +46,7 @@ In the `...` settings menu, there are four quality options provided by the stati
 
 - Mobile (64kbps Opus)
 - Standard (128kbps MP3)
-- High (256kbps MP#)
+- High (256kbps MP3)
 - Lossless (FLAC) (requires Indigo subscription)
 
 ### Advanced Settings

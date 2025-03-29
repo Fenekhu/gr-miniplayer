@@ -95,12 +95,3 @@ class PlayerState {
   PlayerState.fromJA(ja.PlayerState jaState): 
     playing = jaState.playing, processingState = ProcessingState.fromJA(jaState.processingState);
 }
-
-/// Represents the current song and player state
-class PlayerInfoState {
-  final bool playing;
-  final ProcessingState processingState;
-  final SongInfo songInfo;
-
-  const PlayerInfoState({required this.playing, required this.processingState, required this.songInfo});
-}
