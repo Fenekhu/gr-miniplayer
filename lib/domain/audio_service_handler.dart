@@ -18,6 +18,9 @@ class MyAudioServiceHandler extends BaseAudioHandler {
   static Future<void> initialize() async {
     _instance = await AudioService.init(
       builder: () => MyAudioServiceHandler(),
+      config: AudioServiceConfig(
+        androidNotificationChannelId: 'gr_miniplayer'
+      )
     );
   }
 
