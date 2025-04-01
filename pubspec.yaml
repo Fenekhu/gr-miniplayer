@@ -50,6 +50,7 @@ dependencies:
   audio_service_mpris: ^0.2.0
   audio_service_platform_interface: ^0.1.3
   smtc_windows: ^1.0.0
+  flutter_discord_rpc: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +62,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  msix: ^3.16.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -105,3 +107,21 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Windows MSI packaging information.
+# See https://pub.dev/packages/msix
+msix_config:
+  display_name: Gensokyo Radio Miniplayer
+  publisher_display_name: Fenekhu
+  identity_name: com.fenekhu.gr_miniplayer
+  msix_version: 0.1.0.0
+  logo_path: ./assets/images/icon.png
+  capabilities: internetClientServer, backgroundMediaPlayback, globalMediaControl # I think media_kit internally uses a local server, so internetClientServer is needed
+  languages: en-us
+  app_installer:
+    publish_folder_path: ./build/windows/msix
+    hours_between_update_checks: 0
+    automatic_background_task: false
+    update_blocks_activation: true
+    show_prompt: false
+    force_update_from_any_version: true

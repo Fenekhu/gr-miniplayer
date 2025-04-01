@@ -1,0 +1,14 @@
+display_name: Gensokyo Radio Miniplayer
+publisher_display_name: Fenekhu
+identity_name: com.fenekhu.gr_miniplayer
+msix_version: 0.1.0.0
+logo_path: ./assets/images/icon.png
+capabilities: internetClientServer, backgroundMediaPlayback, globalMediaControl # I think media_kit internally uses a local server, so internetClientServer is needed
+languages: en-us
+app_installer:
+  publish_folder_path: ./build/windows/msix
+  hours_between_update_checks: 0
+  automatic_background_task: false
+  update_blocks_activation: true
+  show_prompt: false
+  force_update_from_any_version: true

@@ -1,0 +1,8 @@
+app_id: 21b87468-99a8-4e9d-bd98-010a94c79919
+publisher: Fenekhu
+publisher_url: https://fenekhu.com
+display_name: Gensokyo Radio Miniplayer
+create_desktop_icon: true
+setup_icon_file: windows/runner/resources/app_icon.ico
+locales:
+  - en

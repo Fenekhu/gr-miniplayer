@@ -18,7 +18,9 @@ Contents:
       - [Default Window Size](#default-window-size)
       - [Caching Pause](#caching-pause)
   - [Build](#build)
-    - [Linux](#linux)
+    - [Prerequisites](#prerequisites)
+    - [Project](#project)
+    - [Special Linux Instructions](#special-linux-instructions)
 
 ## Installation
 
@@ -88,7 +90,12 @@ Example: `"player.cachingPause": false`
 
 ## Build
 
-Flutter SDK must be installed prior to these build instructions. See Flutter's instructions for that [here](https://docs.flutter.dev/get-started/install). Choose your platform -> Desktop.
+### Prerequisites
+
+- Flutter SDK must be installed prior to these build instructions. See Flutter's instructions for that [here](https://docs.flutter.dev/get-started/install). Choose your platform -> Desktop.
+- [Rustup](https://rustup.rs/) is required. (Required by [smtc_windows](https://pub.dev/packages/smtc_windows) and [flutter_discord_rpc](https://pub.dev/packages/flutter_discord_rpc) packages.)
+
+### Project
 
 Clone this repository or download and extract it. In the project folder, run the following commands to setup the project:
 
@@ -107,7 +114,7 @@ flutter build <platforms>
 
 Where `<platforms>` is either `windows`, `macos` or `linux`. The output file will be somewhere in the directory `/build/<platform>/...`, with different locations for different platform-specific build systems. For example, x64 Windows uses Visual Studio, so the executable is `/build/windows/x64/runner/Release/gr_miniplayer.exe`
 
-### Linux
+### Special Linux Instructions
 
 `libmpv` and `mpv` packages are required to build the project.
 
