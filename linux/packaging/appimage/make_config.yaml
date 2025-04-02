@@ -1,0 +1,23 @@
+display_name: Gensokyo Radio Miniplayer
+
+icon: assets/images/icon.png
+
+keywords:
+  - Touhou
+  - Music
+  - Gensokyo
+  - Radio
+
+generic_name: Gensokyo Radio Miniplayer
+
+categories:
+  - Music
+
+# i wish i could find documentation on what this does :/
+startup-notify: true
+
+# im not sure what difference manually specifying this makes.
+include:
+  - libmpv.so.2
+
+metainfo: linux/packaging/com.fenekhu.gr_miniplayer.appdata.xml

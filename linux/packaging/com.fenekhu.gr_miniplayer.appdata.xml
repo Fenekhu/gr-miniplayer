@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.fenekhu.gr_miniplayer</id>
+  
+  <name>Gensokyo Radio Miniplayer</name>
+  <summary>A compact, cross-platform unofficial desktop player for Gensokyo Radio.</summary>
+  
+  <metadata_license>MIT</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+  
+  <description>
+    <p>
+      A compact, cross-platform unofficial desktop player for Gensokyo Radio.
+    </p>
+  </description>
+  
+  <launchable type="desktop-id">com.fenekhu.gr_miniplayer.desktop</launchable>
+  
+  <icon type="stock">gr_miniplayer</icon>
+  
+  <categories>
+    <category>AudioVideo</category>
+    <category>Player</category>
+  </categories>
+  
+  <provides>
+    <binary>gr_miniplayer</binary>
+  </provides>
+</component>

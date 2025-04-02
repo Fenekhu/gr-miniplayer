@@ -20,8 +20,9 @@ Contents:
       - [Caching Pause](#caching-pause)
   - [Build](#build)
     - [Prerequisites](#prerequisites)
-    - [Project](#project)
-    - [Special Linux Instructions](#special-linux-instructions)
+    - [Setup](#setup)
+    - [Build with Flutter](#build-with-flutter)
+    - [Package with Fastforge](#package-with-fastforge)
 
 ## Installation
 
@@ -103,8 +104,9 @@ Example: `"player.cachingPause": false`
 
 - Flutter SDK must be installed prior to these build instructions. See Flutter's instructions for that [here](https://docs.flutter.dev/get-started/install). Choose your platform -> Desktop.
 - [Rustup](https://rustup.rs/) is required. (Required by [smtc_windows](https://pub.dev/packages/smtc_windows) and [flutter_discord_rpc](https://pub.dev/packages/flutter_discord_rpc) packages.)
+- **Linux**: `libmpv-dev` and maybe `mpv` are required to build the project.
 
-### Project
+### Setup
 
 Clone this repository or download and extract it. In the project folder, run the following commands to setup the project:
 
@@ -115,7 +117,9 @@ flutter pub get
 
 If using the VSCode extension, the project can be run through VSCode (ie, press F5).
 
-To build the project in release mode:
+### Build with Flutter
+
+The project can be built in release mode through the Flutter CLI:
 
 ```bash
 flutter build <platforms>
@@ -123,10 +127,24 @@ flutter build <platforms>
 
 Where `<platforms>` is either `windows`, `macos` or `linux`. The output file will be somewhere in the directory `/build/<platform>/...`, with different locations for different platform-specific build systems. For example, x64 Windows uses Visual Studio, so the executable is `/build/windows/x64/runner/Release/gr_miniplayer.exe`
 
-### Special Linux Instructions
+### Package with Fastforge
 
-`libmpv` and `mpv` packages are required to build the project.
+The app can also be packaged through [fastforge](https://fastforge.dev/), which uses the `distribute_options.yaml` file to specify packaging formats. The configuration for each format can be found in the `[platform]/packaging/[target]/make_config.yaml` file. Each packaging format may have certain software requirements to build. Check the fastforge documentation for details.  
+
+Fastforge can be installed like so:
 
 ```bash
-sudo apt install libmpv-dev mpv
+dart pub global activate fastforge
+```
+
+All packages can be generated with the following single command:
+
+```bash
+fastforge release --name release
+```
+
+Alternatively, individual packages can be generated:
+
+```bash
+fastforge package --platform=windows --targets=exe,msix
 ```

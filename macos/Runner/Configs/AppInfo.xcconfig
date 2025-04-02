@@ -8,7 +8,7 @@
 PRODUCT_NAME = Gensokyo Radio Miniplayer
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.fenekhu.grMiniplayer
+PRODUCT_BUNDLE_IDENTIFIER = com.fenekhu.gr_miniplayer
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 Fenekhu. Open source under GNU GPLv3.
