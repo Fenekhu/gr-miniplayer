@@ -10,6 +10,8 @@ keywords:
 
 generic_name: Gensokyo Radio Miniplayer
 
+actions: []
+
 categories:
   - Music
 
@@ -17,7 +19,7 @@ categories:
 startup-notify: true
 
 # im not sure what difference manually specifying this makes.
-include:
-  - libmpv.so.2
+#include:
+#  - libmpv.so.2
 
 metainfo: linux/packaging/com.fenekhu.gr_miniplayer.appdata.xml
