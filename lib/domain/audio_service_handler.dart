@@ -15,7 +15,7 @@ class MyAudioServiceHandler extends BaseAudioHandler {
   static MyAudioServiceHandler get instance => _instance;
 
   /// registers this class as the handler for Audio Service
-  static Future<void> initialize() async {
+  static Future<void> ensureInitialized() async {
     _instance = await AudioService.init(
       builder: () => MyAudioServiceHandler(),
       config: AudioServiceConfig(
@@ -69,7 +69,7 @@ class MyAudioServiceHandler extends BaseAudioHandler {
     _artProvider = cache;
   }
 
-  void setPlayer(AudioPlayer player) {
+  void setAudioPlayer(AudioPlayer player) {
     _player = player;
     _playerStateSub?.cancel();
     _playerStateSub = _player!.playerStateStream.listen(_onPlayerState);

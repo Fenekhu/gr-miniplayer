@@ -9,6 +9,7 @@ import 'package:gr_miniplayer/data/service/hidden_art_list.dart';
 import 'package:gr_miniplayer/data/service/info_websocket.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
 import 'package:gr_miniplayer/domain/audio_service_handler.dart';
+import 'package:gr_miniplayer/domain/discord_presence.dart';
 import 'package:gr_miniplayer/domain/rating_favorite_bridge.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_model.dart';
 import 'package:gr_miniplayer/ui/art_or_login/art_or_login_view.dart';
@@ -25,7 +26,8 @@ Future<void> main() async {
   await shared_prefs.ensureInitialized();
   await AudioServiceSmtc.ensureInitialized();
   await AudioPlayer.ensureInitialized();
-  await MyAudioServiceHandler.initialize();
+  await MyAudioServiceHandler.ensureInitialized();
+  await DiscordPresence.ensureInitialized();
   await window_utils.setupWindow();
 
   runApp(
@@ -117,8 +119,12 @@ class _MyHomePageState extends State<MyHomePage> {
       context.read<RatingFavoriteBridge>();
       MyAudioServiceHandler.instance
         ..setArtCache(context.read())
-        ..setPlayer(context.read())
+        ..setAudioPlayer(context.read())
         ..setSongInfoRepo(context.read());
+      DiscordPresence.instance
+        ..setAudioPlayer(context.read())
+        ..setSongInfoRepo(context.read())
+        ..maybeConnect();
       context.read<SongInfoRepo>().connect(retryDelay: null);
     });
   }

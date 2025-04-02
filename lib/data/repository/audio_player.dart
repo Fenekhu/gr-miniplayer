@@ -45,6 +45,8 @@ class AudioPlayer {
 
   StreamEndpoint? get endpoint => _endpoint;
 
+  bool get playing => _jaPlayer.playing;
+
   set endpoint(StreamEndpoint? value) {
     // early exit if value is null or the endpoint isn't actually being changed.
     if (_endpoint == value || value == null) return;

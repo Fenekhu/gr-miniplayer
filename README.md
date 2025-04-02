@@ -16,6 +16,7 @@ Contents:
     - [Advanced Settings](#advanced-settings)
       - [Art Quality](#art-quality)
       - [Default Window Size](#default-window-size)
+      - [Discord Rich Presence](#discord-rich-presence)
       - [Caching Pause](#caching-pause)
   - [Build](#build)
     - [Prerequisites](#prerequisites)
@@ -78,6 +79,14 @@ The default window size to reset to after presing the Reset Window Size button i
 Key: `window.defaultWidth`, `window.defaultHeight`  
 Values: `double`  
 Example: `"window.defaultWidth": 288.0, "window.defaultHeight": 416.0`
+
+#### Discord Rich Presence
+
+Whether to display the current song as a discord status when listening.
+
+Key: `discordRPC.enabled`  
+Values: `bool`: `true` (default), `false`  
+Example: `"discordRPC.enabled": true`  
 
 #### Caching Pause
 

@@ -13,7 +13,7 @@ import 'package:path_provider/path_provider.dart';
 /// Exists to prevent multiple fetches of the same image when the UI is hot-reloaded
 /// or when the media transport needs a URI.
 class ArtCache {
-  static const String _placeholderPath = 'images/placeholder-art.png';
+  static const String _placeholderPath = 'images/icon.png';
   static const BoxFit _imageFit = BoxFit.contain;
   static final http.Client _client = http.IOClient(HttpClient()..userAgent = app_info.userAgent);
 

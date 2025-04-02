@@ -80,6 +80,8 @@ const _streamEndpointProp = StringProperty('stream.endpoint', '2');
 const _volumeProp = DoubleProperty('player.volume', 1);
 const _cachingPauseProp = BoolProperty('player.cachingPause', false);
 
+const _discordRpcEnabledProp = BoolProperty('discordRPC.enabled', true);
+
 double get windowX => _windowXProp.value;
 set windowX(double v) => _windowXProp.value = v;
 
@@ -124,3 +126,6 @@ set playerVolume(double v) => _volumeProp.value = v;
 
 bool get cachingPause => _cachingPauseProp.value;
 set cachingPause(bool v) => _cachingPauseProp.value = v;
+
+bool get discordRpcEnabled => _discordRpcEnabledProp.value;
+set discordRpcEnabled(bool v) => _discordRpcEnabledProp.value = v;
