@@ -20,6 +20,7 @@ import 'package:gr_miniplayer/ui/art_or_login/art_or_login_view.dart';
 import 'package:gr_miniplayer/ui/control_bar/control_bar_view.dart';
 import 'package:gr_miniplayer/ui/window_controls_view.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 import 'package:gr_miniplayer/util/lib/shared_prefs.dart';
 import 'package:gr_miniplayer/util/lib/window_utils.dart' as window_utils;
 import 'package:provider/provider.dart';
@@ -133,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RatingFavoriteBridge>();
-      //context.read<HistoryUpdater>();
+      context.read<HistoryUpdater>();
       MyAudioServiceHandler.instance
         ..setArtCache(context.read())
         ..setAudioPlayer(context.read())
@@ -151,24 +152,26 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Stack(
         children: [
-          ListView(
-            children: [
-              DragToMoveArea(
-                child: ArtOrLoginView(
-                  viewModel: ArtOrLoginModel(
-                    userResources: context.read(),
+          SingleChildScrollView(
+            child: Column(
+              spacing: app_style.mainContentSectionSpacing,
+              children: [
+                DragToMoveArea(
+                  child: ArtOrLoginView(
+                    viewModel: ArtOrLoginModel(
+                      userResources: context.read(),
+                    )
+                  ),
+                ),
+                ControlBar(),
+                HistoryView(
+                  viewModel: HistoryModel(
+                    history: context.read(),
+                    artCache: context.read(),
                   )
                 ),
-              ),
-              SizedBox(height: 8),
-              ControlBar(),
-              SizedBox(height: 8),
-              // HistoryView(
-              //   viewModel: HistoryModel(
-              //     history: context.read(),
-              //   )
-              // ),
-            ],
+              ],
+            ),
           ),
           Positioned(
             top: 0,

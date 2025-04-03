@@ -20,7 +20,7 @@ class ArtDisplayModel {
   final SongInfoRepo _songInfoRepo;
   final ArtCache _artProvider;
 
-
+  SongInfo? get latestInfo => _songInfoRepo.latestInfo;
   Stream<SongInfo> get infoStream => _songInfoRepo.infoStream;
   Stream<ArtHidingStatus> get visibilityStream => _hiddenArtManager.artHidingStatusStream;
 

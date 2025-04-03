@@ -9,6 +9,7 @@ class InfoDisplayModel {
 
   final SongInfoRepo _songInfoRepo;
 
+  SongInfo? get latestInfo => _songInfoRepo.latestInfo;
   Stream<SongInfo> get infoStream => _songInfoRepo.infoStream;
   Stream<ProgressStatus> get progressStream => _songInfoRepo.progressStream;
 }

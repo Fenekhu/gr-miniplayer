@@ -57,12 +57,14 @@ class InfoDisplayView extends StatelessWidget {
         StreamBuilder<SongInfo>(
           stream: viewModel.infoStream, // build text based on song info stream
           builder: (context, snapshot) {
-            final title = snapshot.data?.title ?? '(no info)';
-            final bottomText = _formatAlbumCircleInfo(snapshot.data);
+            final data = snapshot.data ?? viewModel.latestInfo;
+            final title = data?.title ?? '(no info)';
+            final bottomText = _formatAlbumCircleInfo(data);
             return LayoutBuilder( // building must wait until layout to recieve available width for marquee.
               builder: (BuildContext context, BoxConstraints constraints) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 0,
                   children: [
                     SizedBox( // Title text
                       height: 20,

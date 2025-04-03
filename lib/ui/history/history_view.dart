@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/domain/history_track.dart';
 import 'package:gr_miniplayer/ui/history/history_model.dart';
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 
 class HistoryView extends StatelessWidget {
   const HistoryView({super.key, required this.viewModel});
@@ -14,12 +15,17 @@ class HistoryView extends StatelessWidget {
       builder: (context, child) {
         int i = 0;
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+          padding: const EdgeInsets.fromLTRB(
+            app_style.mainContentHorizontalPadding, 
+            4, 
+            app_style.mainContentHorizontalPadding, 
+            app_style.mainContentSectionSpacing
+          ),
           child: Column(
             spacing: 8,
             children: [
-              for (HistoryTrack track in viewModel.list.reversed) 
-                _TrackItem(key: Key('ht${i++}'), track: track)
+              for (HistoryTrack track in viewModel.list.reversed.skip(1)) 
+                _TrackItem(key: Key('ht${i++}'), track: track, viewModel: viewModel),
             ],
           ),
         );
@@ -32,18 +38,20 @@ class _TrackItem extends StatelessWidget {
   const _TrackItem({
     super.key,
     required this.track,
+    required this.viewModel,
   });
 
   final HistoryTrack track;
+  final HistoryModel viewModel;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       spacing: 8,
       children: [
-        Placeholder(
-          fallbackWidth: 32,
-          fallbackHeight: 32,
+        SizedBox.square(
+          dimension: 40,
+          child: viewModel.getThumbnail(track.albumArt),
         ),
         Expanded(child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -60,6 +68,7 @@ class _TrackItem extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               overflow: TextOverflow.fade,
+              style: app_style.otherInfoStyle,
             ),
           ],
         ))

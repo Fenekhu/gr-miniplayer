@@ -8,6 +8,7 @@ class PlaybackControlModel {
 
   final AudioPlayer _player;
 
+  bool get playing => _player.playing;
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
 
   Future<void> play() => _player.play();

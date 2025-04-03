@@ -18,7 +18,7 @@ class PlaybackControlView extends StatelessWidget {
         builder: (context, snapshot) { // build play/stop/loading icon based on player state
           final PlayerState? playerState = snapshot.data;
           final ProcessingState? processingState = playerState?.processingState;
-          final bool? playing = playerState?.playing;
+          final bool playing = playerState?.playing ?? viewModel.playing;
 
           final IconButton playButton = IconButton(
             icon: const Icon(Icons.play_arrow),

@@ -51,6 +51,7 @@ dependencies:
   audio_service_platform_interface: ^0.1.3
   smtc_windows: ^1.0.0
   flutter_discord_rpc: ^1.0.0
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:

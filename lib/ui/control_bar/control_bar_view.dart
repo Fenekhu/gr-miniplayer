@@ -10,6 +10,7 @@ import 'package:gr_miniplayer/ui/control_bar/volume_control/volume_control_model
 import 'package:gr_miniplayer/ui/control_bar/volume_control/volume_control_view.dart';
 import 'package:gr_miniplayer/ui/info_display/info_display_model.dart';
 import 'package:gr_miniplayer/ui/info_display/info_display_view.dart';
+import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 import 'package:provider/provider.dart';
 
 class ControlBar extends StatelessWidget {
@@ -22,8 +23,8 @@ class ControlBar extends StatelessWidget {
       bridge: context.read(),
     );
 
-    return FractionallySizedBox( // constrain the side of the info and button display
-      widthFactor: 5.0/6,
+    return Padding( // constrain the side of the info and button display
+      padding: EdgeInsets.symmetric(vertical: 0, horizontal: app_style.mainContentHorizontalPadding),
       child: Column(
         spacing: 8,
         mainAxisAlignment: MainAxisAlignment.start,

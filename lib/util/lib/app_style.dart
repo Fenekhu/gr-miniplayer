@@ -12,5 +12,8 @@ const double windowIconSize = windowIconBoxSize - 8;
 
 const double marqueeBlankWidth = 48;
 
+const double mainContentSectionSpacing = 12;
+const double mainContentHorizontalPadding = 20;
+
 const TextStyle songTitleStyle = TextStyle(fontWeight: FontWeight.bold);
 const TextStyle otherInfoStyle = TextStyle(color: Colors.grey);

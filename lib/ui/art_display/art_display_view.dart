@@ -19,9 +19,10 @@ class ArtDisplayView extends StatelessWidget {
         return StreamBuilder<SongInfo>(
           stream: viewModel.infoStream,
           builder: (context1, snapshot1) {
-            final String albumUrl = snapshot1.data?.albumArt ?? '';
+            final data1 = snapshot1.data ?? viewModel.latestInfo;
+            final albumArtID = data1?.albumArt ?? '';
             final statusAlbumID = snapshot0.data?.albumID ?? '0';
-            final infoAlbumID = snapshot1.data?.albumID ?? '0';
+            final infoAlbumID = data1?.albumID ?? '0';
             final hide = 
               statusAlbumID != '0' && 
               infoAlbumID != '0' && 
@@ -38,7 +39,7 @@ class ArtDisplayView extends StatelessWidget {
                   child: ImageFiltered(
                     enabled: hide, // whether to activate the blur or not
                     imageFilter: ImageFilter.blur(sigmaX: 50, sigmaY: 50, tileMode: TileMode.decal),
-                    child: viewModel.getAlbumArt(albumUrl),
+                    child: viewModel.getAlbumArt(albumArtID),
                   ),
                 ),
                 Positioned( // visibility toggle button (positioning)
