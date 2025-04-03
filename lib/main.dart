@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/data/repository/art_cache.dart';
 import 'package:gr_miniplayer/data/repository/audio_player.dart';
 import 'package:gr_miniplayer/data/repository/hidden_art_manager.dart';
+import 'package:gr_miniplayer/data/repository/song_history.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
 import 'package:gr_miniplayer/data/repository/user_data.dart';
-import 'package:gr_miniplayer/data/service/audio_service_smtc.dart';
+import 'package:gr_miniplayer/domain/history_updater.dart';
+import 'package:gr_miniplayer/ui/history/history_model.dart';
+import 'package:gr_miniplayer/ui/history/history_view.dart';
+import 'package:gr_miniplayer/util/lib/audio_service_smtc.dart';
 import 'package:gr_miniplayer/data/service/hidden_art_list.dart';
 import 'package:gr_miniplayer/data/service/info_websocket.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
@@ -72,11 +76,23 @@ Future<void> main() async {
         Provider(
           create: (context) => ArtCache(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => SongHistory(
+            apiClient: context.read(),
+          ),
+        ),
 
         Provider(
           create: (context) => RatingFavoriteBridge(
             songInfoRepo: context.read(), 
             userResources: context.read(),
+          ),
+          dispose: (context, value) => value.dispose(),
+        ),
+        Provider(
+          create: (context) => HistoryUpdater(
+            infoRepo: context.read(), 
+            history: context.read(),
           ),
           dispose: (context, value) => value.dispose(),
         ),
@@ -117,6 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<RatingFavoriteBridge>();
+      //context.read<HistoryUpdater>();
       MyAudioServiceHandler.instance
         ..setArtCache(context.read())
         ..setAudioPlayer(context.read())
@@ -145,6 +162,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               SizedBox(height: 8),
               ControlBar(),
+              SizedBox(height: 8),
+              // HistoryView(
+              //   viewModel: HistoryModel(
+              //     history: context.read(),
+              //   )
+              // ),
             ],
           ),
           Positioned(

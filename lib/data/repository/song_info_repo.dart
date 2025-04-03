@@ -33,7 +33,7 @@ class SongInfoRepo {
         _played++;
         return ret;
       }
-    );
+    ).asBroadcastStream();
   }
 
   final InfoWebsocket _websocket;

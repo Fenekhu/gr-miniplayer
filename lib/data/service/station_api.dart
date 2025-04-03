@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:gr_miniplayer/domain/history_track.dart';
 import 'package:gr_miniplayer/util/exceptions.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/json_util.dart' as json_util;
@@ -166,6 +168,34 @@ class StationApiClient {
     // check if the server returned a successful response, 
     // then discard the "empty" body.
     return _checkGenericResponse(response).map((_) => unit);
+  }
+
+  /// Gets the last 25 songs played on the station.
+  AsyncResult<Iterable<HistoryTrack>> getHistory() async {
+    final response = await _client.get(
+      Uri.parse('https://gensokyoradio.net/api/station/history'),
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body) as List<dynamic>;
+      // the API gives the history with the most recent at [0], but I want the most recent at the end of the list to make growing more natural.
+      // Then .map() converts each Map<String, dynamic> to a HistoryTrack object.
+      return Success(body.reversed.map((track) =>
+        HistoryTrack(
+          played: json_util.tryToInt(track['PLAYED']) ?? 0, 
+          title: track['TITLE']?.toString() ?? '', 
+          artist: track['ARTIST']?.toString() ?? '', 
+          albumID: track['ALBUMID']?.toString() ?? '', 
+          album: track['ALBUM']?.toString() ?? '', 
+          albumArt: track['ALBUMART']?.toString() ?? '', 
+          circle: track['CIRCLE']?.toString() ?? '', 
+          track: json_util.tryToInt(track['TRACK']) ?? 0
+        )
+      ));
+    } else {
+      return Failure(BadResponseCodeException(response));
+    }
+
   }
   
 }
