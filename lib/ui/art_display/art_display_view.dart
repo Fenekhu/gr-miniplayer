@@ -20,7 +20,7 @@ class ArtDisplayView extends StatelessWidget {
           stream: viewModel.infoStream,
           builder: (context1, snapshot1) {
             final data1 = snapshot1.data ?? viewModel.latestInfo;
-            final albumArtID = data1?.albumArt ?? '';
+            final albumArtID = data1?.albumArtID ?? '';
             final statusAlbumID = snapshot0.data?.albumID ?? '0';
             final infoAlbumID = data1?.albumID ?? '0';
             final hide = 

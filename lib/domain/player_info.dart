@@ -9,6 +9,7 @@ class SongInfo {
   final String album;
   final String circle;
   final int    year;
+  final String albumArtID;
   final String albumArt;
   final int    duration;
   final int    played;
@@ -22,7 +23,8 @@ class SongInfo {
     required this.album, 
     required this.circle, 
     required this.year, 
-    required this.albumArt, 
+    required this.albumArtID, 
+    required this.albumArt,
     required this.duration, 
     required this.played, 
     required this.remaining,

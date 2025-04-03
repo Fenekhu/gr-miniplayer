@@ -37,7 +37,7 @@ class MyAudioServiceHandler extends BaseAudioHandler {
       id: (_mediaID++).toString(), // needs to be unique apparently.
       title: info.title,
       album: info.album,
-      artUri: (await _artProvider?.getImageFile(info.albumArt))?.absolute.uri,
+      artUri: (await _artProvider?.getImageFile(info.albumArtID))?.absolute.uri,
       artist: info.artist,
       duration: Duration(seconds: info.duration),
       isLive: true,

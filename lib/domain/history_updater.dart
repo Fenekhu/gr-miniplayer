@@ -17,7 +17,7 @@ class HistoryUpdater {
             artist: info.artist, 
             albumID: info.albumID, 
             album: info.album, 
-            albumArt: info.albumArt, 
+            albumArt: info.albumArtID, 
             circle: info.circle, 
             track: 0 // Song info doesn't contain this, so I probably wont be displaying it either
           )
