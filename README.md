@@ -67,11 +67,13 @@ From there, it will most likely be in `com.fenekhu/Gensokyo Radio Miniplayer/sha
 
 #### Art Quality
 
-The resolution (maximum dimension for non-square images) of art to be retrieved from the station.  
+The resolution (maximum dimension for non-square images) of art to be retrieved from the station. Not all images are available at lower qualities.
 
 Key: `art.quality`  
 Values: `string`: `500` (default), `200`, `100`, `40`  
 Example: `"art.quality": "500"`  
+
+Note: Images are cached at whatever quality they are first retrieved at. The cache can be manually deleted from disk, but [`path_provider`](https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationCacheDirectory.html) doesn't make it clear where it is located on each system. On Windows, it is `%APPDATA%\Local\com.fenekhu\Gensokyo Radio Miniplayer\art`.
 
 #### Default Window Size
 
