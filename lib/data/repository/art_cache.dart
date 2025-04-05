@@ -23,7 +23,7 @@ class ArtCache {
   /// returns the file of a cache copy of the asset in assets/assetPath
   // needed because there's no way to get the file path of an asset, but media transport needs a path.
   static Future<File> _cachedFromAsset(String assetPath) async {
-    final file = File(path.join((await getTemporaryDirectory()).path, assetPath));
+    final file = File(path.join((await getApplicationCacheDirectory()).path, assetPath));
     if (file.existsSync()) { // check if its already been cached
       return file;
     } else { // otherwise, load its raw asset bytes and store them in a new file (whose path is now accessible)
@@ -68,12 +68,21 @@ class ArtCache {
   }
 
   /// downloads an image to the cache if it isn't already there (or optionally force it to download anyway).
-  /// id: the filename like '_75896f85ef.jpg'
-  Future<File> _maybeDownloadImage(String id, {bool force = false}) async {
+  Future<File> _maybeDownloadImage(String url, {bool force = false}) async {
+    // id: the filename like '_75896f85ef.jpg'
+    final id = path.basename(url);
+
     // If the completer exists (true if it is currently or already has downloaded), return its future.
     // this needs to be checked before checking the file exists to prevent returning an empty file while the image is still downloading.
     if (_completers[id] != null) return _completers[id]!.future;
-    // update the status for the requested image.
+
+    // gr-logo-placeholder.png is at a different url base than album images.
+    // To be consistent, I'm going to replace references to it with our placeholder.
+    if (id.isEmpty || id == 'gr-logo-placeholder.png') {
+      return _placeholderArtFile;
+    }
+
+    // update the status as we start to download the requested image.
     _completers[id] = Completer();
 
     final file = await _getFileForID(id);
@@ -86,16 +95,21 @@ class ArtCache {
     }
     // otherwise continue on with downloading.
 
-    // create the file if it doesn't exist.
-    if (!fileExists) file.create(recursive: true);
-
     log('downloading new image to ${file.absolute.path}', name: 'Art Cache');
 
     try {
       final uri = Uri.parse('https://gensokyoradio.net/images/albums/${app_settings.artQuality.value}/$id'); // Note: not all images seem to be available at all qualities, especially lower ones.
       final response = await _client.get(uri); // download from url
-      if (response.statusCode != 200) throw BadResponseCodeException(response);
-      file.writeAsBytesSync(response.bodyBytes, flush: true); // write results to file
+      
+      // data should only be saved after a successful fetch to prevent creating an empty file.
+      if (response.statusCode == 200) {
+        // create the file if it doesn't exist.
+        if (!fileExists) file.create(recursive: true);
+        file.writeAsBytesSync(response.bodyBytes, flush: true); // write results to file
+      } else { // otherwise return placeholder art.
+        log('bad response fetching art', error: BadResponseCodeException(response), name: 'Art Cache');
+        return _placeholderArtFile;
+      }
     } finally {
       // the completer needs to reset if something goes wrong, otherwise the future will never release.
       _completers[id]!.complete(file);
@@ -106,17 +120,12 @@ class ArtCache {
   }
 
   /// returns the locally cached image's file, downloading it if needed. The future completes as soon as the file is available.
-  Future<File> getImageFile(String id) async {
-    if (id.isEmpty) return _placeholderArtFile;
-    return _maybeDownloadImage(id);
-  }
+  Future<File> getImageFile(String url) => _maybeDownloadImage(url);
 
   /// returns the cached image, downloading it if needed. The future completes as soon as the image is ready.
-  Future<Image> getImage(String id) async {
-    if (id.isEmpty) return placeholderArt;
-
+  Future<Image> getImage(String url) async {
     return Image.file(
-      await _maybeDownloadImage(id),
+      await _maybeDownloadImage(url),
       fit: _imageFit,
       errorBuilder: (context, error, stackTrace) {
         log('getImage error', error: error, stackTrace: stackTrace, name: 'Art Cache');
@@ -126,9 +135,9 @@ class ArtCache {
   }
 
   /// returns a widget that will resolve to an image once its ready.
-  FutureBuilder<Image> getImageWidget(String id) {
+  FutureBuilder<Image> getImageWidget(String url) {
     return FutureBuilder(
-      future: getImage(id), 
+      future: getImage(url), 
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           log('image snapshot has error', error: snapshot.error, stackTrace: snapshot.stackTrace, name: 'Art Cache'); 

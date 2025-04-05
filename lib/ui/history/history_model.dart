@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/data/repository/art_cache.dart';
 import 'package:gr_miniplayer/data/repository/song_history.dart';
-import 'package:gr_miniplayer/domain/history_track.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 
 class HistoryModel {
   HistoryModel({required SongHistory history, required ArtCache artCache}):
@@ -17,5 +17,5 @@ class HistoryModel {
 
   UnmodifiableListView<HistoryTrack> get list => _history.list;
   
-  Widget getThumbnail(String id) => _artCache.getImageWidget(id);
+  Widget getThumbnail(String url) => _artCache.getImageWidget(url);
 }

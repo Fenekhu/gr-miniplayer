@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:gr_miniplayer/domain/history_track.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:gr_miniplayer/util/exceptions.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/json_util.dart' as json_util;

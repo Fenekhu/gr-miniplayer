@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:gr_miniplayer/data/repository/song_history.dart';
 import 'package:gr_miniplayer/data/repository/song_info_repo.dart';
-import 'package:gr_miniplayer/domain/history_track.dart';
 import 'package:gr_miniplayer/domain/player_info.dart';
+import 'package:path/path.dart' as path;
 
 class HistoryUpdater {
   HistoryUpdater({required SongInfoRepo infoRepo, required SongHistory history}):
@@ -17,7 +17,7 @@ class HistoryUpdater {
             artist: info.artist, 
             albumID: info.albumID, 
             album: info.album, 
-            albumArt: info.albumArtID, 
+            albumArt: path.basename(info.albumArt), 
             circle: info.circle, 
             track: 0 // Song info doesn't contain this, so I probably wont be displaying it either
           )
