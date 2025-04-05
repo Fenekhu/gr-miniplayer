@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gr_miniplayer/domain/history_track.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:gr_miniplayer/ui/history/history_model.dart';
 import 'package:gr_miniplayer/util/lib/app_style.dart' as app_style;
 

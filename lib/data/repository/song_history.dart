@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:gr_miniplayer/data/service/station_api.dart';
-import 'package:gr_miniplayer/domain/history_track.dart';
+import 'package:gr_miniplayer/domain/player_info.dart';
 import 'package:gr_miniplayer/util/extensions/result_ext.dart';
 import 'package:result_dart/result_dart.dart';
 
