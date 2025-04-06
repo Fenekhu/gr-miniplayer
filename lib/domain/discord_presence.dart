@@ -138,7 +138,11 @@ class DiscordPresence {
     }
   }
 
-  Future<void> connect() => FlutterDiscordRPC.instance.connect();
+  Future<void> connect() async {
+    return FlutterDiscordRPC.instance.connect()
+      .onError((e, s) => log('unable to connect to discord', error: e, stackTrace: s));
+  }
+
   Future<void> disconnect() => FlutterDiscordRPC.instance.disconnect();
 
   Future<void> dispose() async {
