@@ -1,4 +1,5 @@
 display_name: Gensokyo Radio Miniplayer
+package_name: gr_miniplayer
 
 icon: assets/images/icon.png
 
@@ -14,6 +15,8 @@ actions: []
 
 categories:
   - Music
+  - AudioVideo
+  - Player
 
 # i wish i could find documentation on what this does :/
 startup-notify: true
@@ -22,4 +25,4 @@ startup-notify: true
 #include:
 #  - libmpv.so.2
 
-metainfo: linux/packaging/com.fenekhu.gr_miniplayer.appdata.xml
+#metainfo: linux/packaging/com.fenekhu.gr_miniplayer.appdata.xml
