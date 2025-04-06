@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
       DiscordPresence.instance
         ..setAudioPlayer(context.read())
         ..setSongInfoRepo(context.read())
-        ..maybeConnect();
+        ..maybeConnect(connectInDebug: true);
       context.read<SongInfoRepo>().connect(retryDelay: null);
     });
   }

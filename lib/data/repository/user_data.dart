@@ -171,15 +171,20 @@ class UserResources {
     }
 
     // process the succesful result, transforming it into a RatingFavoriteStatus object.
-    return result.map((resp) {
-      _cachedRatingFavoriteStatus = RatingFavoriteStatus(
-        rating: resp.rating, 
-        year: resp.year, 
-        favorite: resp.favorite,
-      );
-      _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
-      return unit;
-    });
+    return result
+      .map((resp) {
+        _cachedRatingFavoriteStatus = RatingFavoriteStatus(
+          rating: resp.rating, 
+          year: resp.year, 
+          favorite: resp.favorite,
+        );
+        _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
+        return unit;
+      })
+      .onFailure((failure) {
+        _cachedRatingFavoriteStatus = RatingFavoriteStatus.empty();
+        _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
+      });
   }
 
   AsyncResult<Unit> submitRating(String songID, int rating) async {

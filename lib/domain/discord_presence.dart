@@ -72,24 +72,26 @@ class DiscordPresence {
   void _queueFromInfo(SongInfo songInfo) {
     final songStart = (DateTime.timestamp().millisecondsSinceEpoch ~/ 1000 - _infoRepo!.played);
 
+    String? emptyToNull(String v) => v.isEmpty? null : v;
+
     _queueState(
       RPCActivity(
-        details: songInfo.title,
-        state: songInfo.circle,
-        timestamps: RPCTimestamps(
+        details: emptyToNull(songInfo.title),
+        state: emptyToNull(songInfo.circle),
+        timestamps: RPCTimestamps( 
           start: songStart,
-          end: songStart + songInfo.duration,
+          end: songInfo.duration == 0? null : songStart + songInfo.duration, // start == end seems to break the API
         ),
         assets: RPCAssets(
-          largeImage: songInfo.albumArt,
-          largeText: songInfo.album,
+          largeImage: emptyToNull(songInfo.albumArt) ?? 'icon',
+          largeText: emptyToNull(songInfo.album),
         ),
-        buttons: [
-          const RPCButton(
+        buttons: const [
+          RPCButton(
             label: 'Listen', 
             url: 'https://app.gensokyoradio.net/player'
           ),
-          const RPCButton(
+          RPCButton(
             label: 'Get Miniplayer',
             url: 'https://github.com/Fenekhu/gr-miniplayer'
           ),
