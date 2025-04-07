@@ -79,7 +79,7 @@ class SongInfoRepo {
   /// Connects to the websocket. 
   /// If an error occurs, attempts reconnection after [retryDelay].
   /// If [retryDelay] is null, does not attempt to reconnect.
-  AsyncResult<Unit> connect({Duration? retryDelay = const Duration(minutes: 2)}) {
+  AsyncResult<Unit> connect({Duration? retryDelay = const Duration(minutes: 1)}) {
     return _websocket.connect(retryDelay);
   }
 }

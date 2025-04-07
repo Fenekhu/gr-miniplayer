@@ -143,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ..setAudioPlayer(context.read())
         ..setSongInfoRepo(context.read())
         ..maybeConnect(connectInDebug: true);
-      context.read<SongInfoRepo>().connect(retryDelay: null);
+      context.read<SongInfoRepo>().connect();
     });
   }
 

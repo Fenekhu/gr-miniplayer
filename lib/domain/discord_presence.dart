@@ -22,6 +22,7 @@ class DiscordPresence {
       (v) {
         log(v? 'connected' : 'disconnected', name: 'Discord RPC');
         _isConnected = v;
+        if (_isConnected) _onConnected();
       }
     );
   }
@@ -43,13 +44,17 @@ class DiscordPresence {
 
   /// Updates the current activity
   Future<void> _sendState() async {
+    _isUpdateQueued = false;
     if (!_isConnected) return;
     _lastSetTime = DateTime.timestamp();
-    _isUpdateQueued = false;
     if (_nextState == null) {
-      await FlutterDiscordRPC.instance.clearActivity();
+      log('clearing activity', name: 'Discord RPC');
+      await FlutterDiscordRPC.instance.clearActivity()
+        .catchError((e) => log('error clearing activity', error: e, name: 'Discord RPC'));
     } else {
-      await FlutterDiscordRPC.instance.setActivity(activity: _nextState!);
+      log('setting activity: {details: ${_nextState!.details}, ...}', name: 'Discord RPC');
+      await FlutterDiscordRPC.instance.setActivity(activity: _nextState!)
+        .catchError((e) => log('error setting activity', error: e, name: 'Discord RPC'));
     }
   }
 
@@ -60,11 +65,11 @@ class DiscordPresence {
   void _queueState(RPCActivity? state) {
     _nextState = state;
     if (!_isUpdateQueued) {
+      _isUpdateQueued = true;
       Future.delayed(
         (_lastSetTime.add(_minWaitTime)).difference(DateTime.timestamp()), // (lastTime+minWait)-now
         _sendState,
       );
-      _isUpdateQueued = true;
     }
   }
 
@@ -110,9 +115,22 @@ class DiscordPresence {
 
   void _onSongInfo(SongInfo info) {
     // early exit if the player isn't set or playing
-    if (_player == null || _player!.playing == false) return;
+    if (_player == null || !_player!.playing) return;
 
     _queueFromInfo(info);
+  }
+
+  /// updates the rpc to the current state, in case discord was started while this app was running
+  void _onConnected() {
+    log('onConnected: {_infoRepo: ${_infoRepo != null}, latestInfo: ${_infoRepo?.latestInfo != null}, _player: ${_player != null}, playing: ${_player?.playing}}', name: 'Discord RPC');
+    if (_infoRepo == null || _infoRepo!.latestInfo == null ||
+        _player == null || !_player!.playing) {
+      log('onConnected clearing activity', name: 'Discord RPC');
+      clearActivity();
+    } else {
+      log('onConnected queuing info: {details: ${_infoRepo!.latestInfo!.title}}', name: 'Discord RPC');
+      _queueFromInfo(_infoRepo!.latestInfo!);
+    }
   }
 
   void setAudioPlayer(AudioPlayer player) {
@@ -138,17 +156,17 @@ class DiscordPresence {
     }
   }
 
-  Future<void> connect() async {
-    return FlutterDiscordRPC.instance.connect()
-      .onError((e, s) => log('unable to connect to discord', error: e, stackTrace: s));
-  }
+  Future<void> connect() => FlutterDiscordRPC.instance.connect(autoRetry: true, retryDelay: const Duration(seconds: 10))
+      .catchError((e) => log('unable to connect to discord', error: e));
 
-  Future<void> disconnect() => FlutterDiscordRPC.instance.disconnect();
+  Future<void> disconnect() => FlutterDiscordRPC.instance.disconnect()
+    .catchError((e) => log('error disconnecting', error: e, name: 'Discord RPC'));
 
   Future<void> dispose() async {
     _playerStateSub?.cancel();
     _infoStreamSub?.cancel();
     _isConnectedStreamSub.cancel();
-    await FlutterDiscordRPC.instance.dispose();
+    await FlutterDiscordRPC.instance.dispose()
+      .catchError((e) => log('error disposing RPC instance', error: e, name: 'Discord RPC'));
   }
 }
