@@ -26,7 +26,7 @@ Contents:
 
 ## Installation
 
-Compiled binaries are not currently available, but will be made available in the Releases GitHub page once ready. For now, the application must be manually built. See [build instructions](#build) below.
+Compiled binaries are available in the [Releases GitHub page](https://github.com/Fenekhu/gr-miniplayer/releases). See [build instructions](#build) below for setting up and building the flutter project locally.
 
 ## Usage
 
