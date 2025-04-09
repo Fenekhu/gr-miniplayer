@@ -22,10 +22,10 @@ releases:
         package:
           platform: windows
           target: exe
-      - name: windows-msix
-        package:
-          platform: windows
-          target: msix
+#      - name: windows-msix
+#        package:
+#          platform: windows
+#          target: msix
       - name: windows-zip
         package:
           platform: windows
