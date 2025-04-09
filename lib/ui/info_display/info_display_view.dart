@@ -15,29 +15,47 @@ bool _willTextOverflow({required String text, required TextStyle style, required
   return textPainter.didExceedMaxLines;
 }
 
-String _formatAlbumCircleInfo(SongInfo? info) => info == null? '(no info)' : '${info.album}    —    ${info.circle}';
+String _formatAlbumCircleInfo(SongInfo? info) {
+  if (info == null || (info.album.isEmpty && info.circle.isEmpty)) {
+    return '—';
+  }
+  final album = info.album.isEmpty? '(unknown album)' : info.album;
+  final circle = info.circle.isEmpty? '(unknown circle)' : info.circle;
+  return'$album    —    $circle';
+}
 
 /// Like a marquee, but acts as regular text if the text fits within the space.
 class _MyMarquee extends StatelessWidget {
   final String text;
   final TextStyle style;
-  final double maxWidth;
-  const _MyMarquee({required this.text, required this.style, required this.maxWidth});
+  const _MyMarquee({required this.text, required this.style});
 
   @override
   Widget build(BuildContext context) {
-    return _willTextOverflow(text: text, style: style, maxWidth: maxWidth)?
-      Marquee( // marquee if text overflows given space
-        text: text,
-        blankSpace: app_style.marqueeBlankWidth,
-        pauseAfterRound: const Duration(seconds: 10),
-        startAfter: const Duration(seconds: 10),
-        showFadingOnlyWhenScrolling: false,
-        velocity: 16,
-        style: style,
-      )
-      : // otherwise text
-      Text(text, style: style, maxLines: 1, textAlign: TextAlign.center,);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return _willTextOverflow(text: text, style: style, maxWidth: constraints.maxWidth)?
+          Marquee( // marquee if text overflows given space
+            text: text,
+            blankSpace: app_style.marqueeBlankWidth,
+            pauseAfterRound: const Duration(seconds: 10),
+            startAfter: const Duration(seconds: 10),
+            showFadingOnlyWhenScrolling: false,
+            velocity: 16,
+            style: style,
+          )
+          : // otherwise text
+          Text(
+            text, 
+            style: style, 
+            maxLines: 1, 
+            softWrap: false,
+            overflow: TextOverflow.visible,
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          );
+      },
+    );
   }
 }
 
@@ -58,33 +76,27 @@ class InfoDisplayView extends StatelessWidget {
           stream: viewModel.infoStream, // build text based on song info stream
           builder: (context, snapshot) {
             final data = snapshot.data ?? viewModel.latestInfo;
-            final title = data?.title ?? '(no info)';
+            final title = (data?.title == null || data!.title.isEmpty) ? '(no info)' : data.title;
             final bottomText = _formatAlbumCircleInfo(data);
-            return LayoutBuilder( // building must wait until layout to recieve available width for marquee.
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: 0,
-                  children: [
-                    SizedBox( // Title text
-                      height: 20,
-                      child: _MyMarquee(
-                        text: title, 
-                        style: app_style.songTitleStyle, 
-                        maxWidth: constraints.maxWidth,
-                      ),
-                    ),
-                    SizedBox( // album -- circle text
-                      height: 20,
-                      child: _MyMarquee(
-                        text: bottomText, 
-                        style: app_style.otherInfoStyle, 
-                        maxWidth: constraints.maxWidth,
-                      ),
-                    ),
-                  ],
-                );
-              },
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 0,
+              children: [
+                SizedBox( // Title text
+                  height: 20,
+                  child: _MyMarquee(
+                    text: title, 
+                    style: app_style.songTitleStyle, 
+                  ),
+                ),
+                SizedBox( // album -- circle text
+                  height: 20,
+                  child: _MyMarquee(
+                    text: bottomText, 
+                    style: app_style.otherInfoStyle, 
+                  ),
+                ),
+              ],
             );
           }
         ),
