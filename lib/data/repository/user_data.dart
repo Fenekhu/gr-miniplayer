@@ -226,18 +226,21 @@ class UserResources {
   AsyncResult<Unit> toggleFavorite(String songID) async {
     // early exit if not logged in.
     if (_getStoredAsi().isEmpty) return Failure(NotLoggedInException('Must be logged in to favorite/unfavorite songs'));
-    // early exit if the request has already been sent once
-    if (_lastSubmittedFavoriteSongID == songID && _lastSubmittedFavoriteState == _cachedRatingFavoriteStatus.favorite) return Success(unit);
+
+    final newState = !_cachedRatingFavoriteStatus.favorite;
+
+    // early exit if the request has already been sent once and not yet processed by the server
+    if (_lastSubmittedFavoriteSongID == songID && _lastSubmittedFavoriteState == newState) return Success(unit);
 
     _lastSubmittedFavoriteSongID = songID;
-    _lastSubmittedFavoriteState = !_cachedRatingFavoriteStatus.favorite; // ! needed because its going to be toggled later in the function.
+    _lastSubmittedFavoriteState = newState;
 
     // As the station's API is not well documented and is subject to change,
     // it's possible that exceptions are thrown while trying to parse the response.
     // In that case, forward that exception as the Failure.
     Result<Unit> result;
     try {
-      if (!_cachedRatingFavoriteStatus.favorite) { // add favorite if not favorited.
+      if (newState) { // add favorite if not favorited.
         result = await _apiClient.addFavorite(_getStoredAsi(), songID);
       } else { // remove favorite if favorited.
         result = await _apiClient.removeFavorite(_getStoredAsi(), songID);
@@ -251,7 +254,7 @@ class UserResources {
       _cachedRatingFavoriteStatus = RatingFavoriteStatus(
         rating: _cachedRatingFavoriteStatus.rating, 
         year: _cachedRatingFavoriteStatus.year,
-        favorite: !_cachedRatingFavoriteStatus.favorite, // toggle favorite state
+        favorite: newState, // toggle favorite state
       );
       _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
     });
