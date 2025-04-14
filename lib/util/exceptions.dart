@@ -13,7 +13,7 @@ import 'package:http/http.dart';
 
 /// Indicates that a non-argument variable (member, global, etc) has an invalid value that prevents further execution.
 class StateException implements Exception {
-  const StateException([this.value, this.variable, this.type = 'StateException']);
+  const StateException({this.value, this.variable, this.type = 'StateException'});
 
   final dynamic value;
   final String? variable;
@@ -28,7 +28,11 @@ class StateException implements Exception {
 
 /// Indicates that the latest song info is missing, or is missing a valid song id
 class MissingSongIDException extends StateException {
-  const MissingSongIDException([super.value, super.variable = 'song id', super.type = 'MissingSongIDException']);
+  const MissingSongIDException({super.value}) : super(variable: 'song id', type: 'MissingSongIDException');
+}
+
+class WebSocketOpenException extends StateException {
+  const WebSocketOpenException() : super(value: 'not null', variable: 'websocket', type: 'WebSocketOpenException');
 }
 
 /// Indicates that the operation is not supported because the user is not logged in.

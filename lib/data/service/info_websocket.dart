@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' show log;
 import 'dart:io';
 
+import 'package:gr_miniplayer/util/exceptions.dart';
 import 'package:gr_miniplayer/util/lib/app_info.dart' as app_info;
 import 'package:gr_miniplayer/util/lib/json_util.dart' as json_util;
 import 'package:result_dart/result_dart.dart';
@@ -36,11 +37,17 @@ class InfoWebsocket {
   }
 
   /// connects to the websocket. Will not complete until successful connection or complete failure (no retry)
-  AsyncResult<Unit> connect(Duration? retryDelay) async {
+  AsyncResult<Unit> connect(Duration? retryDelay, {bool forceReconnect = false}) async {
     _retryDelay = retryDelay;
-    await _webSocketSub?.cancel();
-    await _webSocket?.close(WebSocketStatus.normalClosure, 'Reconnecting');
-    _webSocketSub = null;
+    if (_webSocket != null) {
+      if (forceReconnect) {
+        await _webSocketSub?.cancel();
+        await _webSocket?.close(WebSocketStatus.normalClosure, 'Reconnecting');
+        _webSocketSub = null;
+      } else {
+        return Failure(WebSocketOpenException());
+      }
+    }
 
     do { // attemt to connect at least one. Repeat if retry delay is not null.
       log('Connecting to websocket', time: DateTime.now(), name:'Info Websocket');
@@ -63,7 +70,7 @@ class InfoWebsocket {
     } while (_retryDelay != null);
 
     // listens to incoming events from the websocket.
-    _webSocketSub = _webSocket?.listen(_handleData, onError: _handleError, cancelOnError: true);
+    _webSocketSub = _webSocket?.listen(_handleData, onDone: _handleEnd, onError: _handleError);
 
     // initiates communications with the websocket, letting the server know we want live info.
     _sendJson({'message': 'grInitialConnection'});
@@ -73,14 +80,20 @@ class InfoWebsocket {
 
   void _sendJson(Map<String, dynamic> msg) {
     final event = jsonEncode(msg);
-    log('Sending Message: $event', time: DateTime.now(), name: 'Info Websocket');
+    log('Sending Message: $event', name: 'Info Websocket');
     _webSocket?.add(event);
   }
 
   void _handleError(Object error, StackTrace trace) {
-    log('Stream Error', time: DateTime.now(), name:'Info Websocket', error: error, stackTrace: trace);
-    // if there is a websocket error (connection dropped, etc) clear the websocket to prevent attempted further communication.
+    log('Stream Error', name:'Info Websocket', error: error, stackTrace: trace);
+    _handleEnd();
+  }
+
+  void _handleEnd() {
+    log('WebSocket finished', name: 'Info Websocket');
+    // clear the websocket to prevent attempted further communication.
     _webSocket = null;
+    _webSocketSub = null;
     if (_retryDelay != null) { // retry connection if enabled.
       log('Reconnecting in ${_retryDelay!.inSeconds} seconds', time: DateTime.now(), name:'Info Websocket');
       Future.delayed(_retryDelay!, () => connect(_retryDelay));
