@@ -2,7 +2,18 @@
 
 A compact, cross-platform unofficial desktop player for [Gensokyo Radio](https://app.gensokyoradio.net/).
 
-[TODO: Insert demo video]
+Featuring integration with platform media controls...
+
+![The player stops and starts without play/stop UI button being pressed.](docs/transport-demo.webp)
+
+...discord status...
+
+![The discord homepage Active Now entry. The status is "Listening to Gensokyo Radio Miniplayer". The details are the title "For the Lost Souls" and the artist "Violet Delta" with the album cover as a thumbnail.](docs/discord-demo-small.png)
+![The discord mini-profile entry. The status is "Listening to Gensokyo Radio Miniplayer". The details are the title "For the Lost Souls", the artist "Violet Delta", and the album "Delusional Makai: Lotus Land Square". The progress bar indicates 04:07 / 07:37 listened. There are two buttons: "Listen" and "Get Miniplayer".](docs/discord-demo-large.png)
+
+...and station history.
+
+![The UI displays a song that has just started playing. The user scrolls down to the history list, revealing For the Lost Souls by Violet Delta at the top.](docs/history-demo.webp)
 
 Contents:
 
@@ -26,19 +37,27 @@ Contents:
 
 ## Installation
 
-Compiled binaries are available in the [Releases GitHub page](https://github.com/Fenekhu/gr-miniplayer/releases). See [build instructions](#build) below for setting up and building the flutter project locally.
+See [Releases GitHub page](https://github.com/Fenekhu/gr-miniplayer/releases) for compiled binaries and installers for Windows, MacOS, and Linux.  
+
+See [build instructions](#build) below for setting up and building the flutter project locally.
 
 ## Usage
 
 ### Show/Hide Album Art
 
+![The user clicks the visibility icon in the top left corner twice. The first click blurs the album art, the second unblurs it.](docs/blur-demo.webp)
+
 If there is a specific album with art you would rather not see (looking at you, *Innocent Key*), you can blur that album's art with the visibility button in the top left corner. The art will remain blurred whenever the album comes up.
 
 ### Login
 
+![The user logs in, activating the rating and favorite buttons.](docs/login-demo.webp)
+
 You can log in with your gensokyoradio.net credentials to enable rating and favorite buttons, as well as the Lossless stream endpoint, if you are logging in from a new IP. The login page can be accessed through the `...` settings menu in the bottom right -> Login button on top.
 
 ### Rate/Favorite Songs
+
+![The user clicks the unrated rating star button, opening a pop-up menu with stars labeled 1-5. The user clicks 5, updating the rating star to yellow with a 5.](docs/rating-demo.webp)
 
 Songs can be rated or favorited if you log in. Similar to the official station PWA, the stars will display blue if the song was rated in a previous year, or yellow if the song was rated this year (and your rating has been counted towards the yearly Top 100). If you see a song with blue stars, consider resubmitting your rating, the station appreciates it.
 
@@ -51,7 +70,7 @@ In the `...` settings menu, there are four quality options provided by the stati
 - Mobile (64kbps Opus)
 - Standard (128kbps MP3)
 - High (256kbps MP3)
-- Lossless (FLAC) (requires Indigo subscription)
+- Lossless (FLAC) (requires [Indigo](https://gensokyoradio.net/indigo/) subscription)
 
 ### Advanced Settings
 
