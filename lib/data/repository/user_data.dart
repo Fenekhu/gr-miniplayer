@@ -192,9 +192,11 @@ class UserResources {
     if (rating < 1 || rating > 5) throw RangeError.range(rating, 1, 5, 'rating');
     // early exit if not logged in.
     if (_getStoredAsi().isEmpty) return Failure(NotLoggedInException('Must be logged in to rate songs'));
-    // early exit if rating already submitted or rating matches current rating.
+
+    final year = DateTime.now().year;
+    // early exit if rating already submitted or rating matches current rating (and that rating is not from a previous year).
     if ((_lastSubmittedRatingSongID == songID && _lastSubmittedRatingScore == rating) 
-      || _cachedRatingFavoriteStatus.rating == rating) {
+      || (_cachedRatingFavoriteStatus.rating == rating && _cachedRatingFavoriteStatus.year == year)) {
         return Success(unit);
       }
 
@@ -215,7 +217,7 @@ class UserResources {
     return result.onSuccess((_) {
       _cachedRatingFavoriteStatus = RatingFavoriteStatus(
         rating: rating, 
-        year: DateTime.now().year, // note that the user may modify the date on their machine. This is ok, because the year is never sent to the server.
+        year: year,
         favorite: _cachedRatingFavoriteStatus.favorite,
       );
       _ratingFavoriteStreamController.add(_cachedRatingFavoriteStatus);
