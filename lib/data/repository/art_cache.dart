@@ -16,32 +16,12 @@ import 'package:path_provider/path_provider.dart';
 /// Exists to prevent multiple fetches of the same image when the UI is hot-reloaded
 /// or when the media transport needs a URI.
 class ArtCache {
-  static const String _placeholderPath = 'images/icon.png';
   static const BoxFit _imageFit = BoxFit.contain;
   static final http.Client _client = http.IOClient(HttpClient()..userAgent = app_info.userAgent);
 
-  /// returns the file of a cache copy of the asset in assets/assetPath
-  // needed because there's no way to get the file path of an asset, but media transport needs a path.
-  static Future<File> _cachedFromAsset(String assetPath) async {
-    final file = File(path.join((await getApplicationCacheDirectory()).path, assetPath));
-    if (file.existsSync()) { // check if its already been cached
-      return file;
-    } else { // otherwise, load its raw asset bytes and store them in a new file (whose path is now accessible)
-      final bytes = await rootBundle.load('assets/$assetPath');
-      return file.create(recursive: true)
-        .then((file) => file.writeAsBytes(Uint8List.sublistView(bytes), flush: true));
-    }
-  }
-
-  
-
-  ArtCache() :
-    placeholderArt = Image.asset('assets/$_placeholderPath', fit: _imageFit),
-    _placeholderArtFile = _cachedFromAsset(_placeholderPath);
-
-  final Future<File> _placeholderArtFile; // needed for media transport, because assets cant be converted directly to paths.
-  final Image placeholderArt;
-  Future<Uri> get placeholderArtUri async => (await _placeholderArtFile).absolute.uri; // needed for media transport
+  static const String _placeholderPath = 'images/icon.png';
+  static final Future<File> _placeholderArtFile = _cachedFromAsset(_placeholderPath); // needed for media transport, because assets cant be converted directly to paths.
+  static Future<Uri> get placeholderArtUri async => (await _placeholderArtFile).absolute.uri; // needed for media transport
 
   // I was running into an asyncronous data race and needed this to fix it.
   // Both the UI and media transport try to get the current art at the same time when info is received. (The UI usually second).
@@ -60,15 +40,15 @@ class ArtCache {
 
   // A map to filename to the completer when multiple separate thumbnails are being downloaded simultaneously.
   // ie <'_75896f85ef.jpg', ...>
-  final Map<String, Completer<File>> _completers = {};
+  static final Map<String, Completer<File>> _completers = {};
 
   /// Get the file for an ID. File may or may not exist. Does not download anything.
-  Future<File> _getFileForID(String id) async {
+  static Future<File> _getFileForID(String id) async {
     return getApplicationCacheDirectory().then((dir) => File(path.join(dir.path, 'art', id)));
   }
 
   /// downloads an image to the cache if it isn't already there (or optionally force it to download anyway).
-  Future<File> _maybeDownloadImage(String url, {bool force = false}) async {
+  static Future<File> _maybeDownloadImage(String url, {bool force = false}) async {
     // id: the filename like '_75896f85ef.jpg'
     final id = path.basename(url);
 
@@ -78,8 +58,9 @@ class ArtCache {
 
     // gr-logo-placeholder.png is at a different url base than album images.
     // To be consistent, I'm going to replace references to it with our placeholder.
-    if (id.isEmpty || id == 'gr-logo-placeholder.png') {
-      return _placeholderArtFile;
+    // Do the same with an empty id or 'null' id. (ie, Touhou Euroheroes albums are https://gensokyoradio.net/images/albums/500/null)
+    switch (id) {
+      case '' || 'null' || 'gr-logo-placeholder.png': return _placeholderArtFile;
     }
 
     // update the status as we start to download the requested image.
@@ -104,20 +85,72 @@ class ArtCache {
       // data should only be saved after a successful fetch to prevent creating an empty file.
       if (response.statusCode == 200) {
         // create the file if it doesn't exist.
-        if (!fileExists) file.create(recursive: true);
+        if (!fileExists) file.createSync(recursive: true);
         file.writeAsBytesSync(response.bodyBytes, flush: true); // write results to file
       } else { // otherwise return placeholder art.
-        log('bad response fetching art', error: BadResponseCodeException(response), name: 'Art Cache');
-        return _placeholderArtFile;
+        throw BadResponseCodeException(response);
       }
-    } finally {
-      // the completer needs to reset if something goes wrong, otherwise the future will never release.
+
       _completers[id]!.complete(file);
       _completers.remove(id);
-    }
+      return file;
 
-    return file;
+    } catch (e) {
+      log('error downloading image: $url', error: e, name: 'Art Cache');
+      // the completer needs to reset if something goes wrong, otherwise the future will never release.
+      // we should also complete it with the placeholder in that case.
+      _completers[id]!.complete(_placeholderArtFile);
+      _completers.remove(id);
+      return _placeholderArtFile;
+    }
   }
+
+  /// returns the file of a cache copy of the asset in assets/assetPath
+  // needed because there's no way to get the file path of an asset, but media transport needs a path.
+  static Future<File> _cachedFromAsset(String assetPath, {bool force = false}) async {
+    // If the completer exists (true if it is currently or already has downloaded), return its future.
+    // this needs to be checked before checking the file exists to prevent returning an empty file while the image is still being copied.
+    if (_completers[assetPath] != null) return _completers[assetPath]!.future;
+
+    // update the status as we start to copy the requested image.
+    _completers[assetPath] = Completer();
+
+    final file = File(path.join((await getApplicationCacheDirectory()).path, assetPath));
+    final fileExists = file.existsSync();
+    // if the file exists and we aren't going to force a copy, return the file.
+    if (fileExists && !force) {
+      _completers[assetPath]!.complete(file);
+      _completers.remove(assetPath);
+      return file;
+    }
+    // otherwise continue on with copying.
+
+    try {
+      if (!fileExists) file.createSync(recursive: true);
+      // load its raw asset bytes and store them in the new file
+      final bytes = await rootBundle.load('assets/$assetPath');
+      file.writeAsBytesSync(Uint8List.sublistView(bytes), flush: true);
+
+      _completers[assetPath]!.complete(file);
+      _completers.remove(assetPath);
+      return file;
+
+    } catch (e) {
+      log('error caching asset: $assetPath', error: e, name: 'Art Cache');
+      // the completer needs to reset if something goes wrong, otherwise the future will never release.
+      _completers[assetPath]!.complete(_placeholderArtFile);
+      _completers.remove(assetPath);
+      return _placeholderArtFile;
+    }
+  }
+
+
+
+  ArtCache() :
+    _placeholderArt = Image.asset('assets/$_placeholderPath', fit: _imageFit);
+
+  final Image _placeholderArt;
+  Image get placeholderArt => _placeholderArt;
 
   /// returns the locally cached image's file, downloading it if needed. The future completes as soon as the file is available.
   Future<File> getImageFile(String url) => _maybeDownloadImage(url);
@@ -142,7 +175,6 @@ class ArtCache {
         if (snapshot.hasError) {
           log('image snapshot has error', error: snapshot.error, stackTrace: snapshot.stackTrace, name: 'Art Cache'); 
         }
-        if (snapshot.data == null) log('image snapshot.data is null, building placeholder', name: 'Art Cache');
         return snapshot.data ?? placeholderArt;
       },
     );
