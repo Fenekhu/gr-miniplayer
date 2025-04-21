@@ -17,9 +17,11 @@ String _formatSeconds(int seconds) {
 /// Provides a stream of SongInfo from the websocket, as well as the most recent SongInfo received.
 class SongInfoRepo {
   SongInfoRepo({required InfoWebsocket infoWebsocket, required HiddenArtList hiddenArtList}) :
-    _websocket = infoWebsocket {
+    _websocket = infoWebsocket,
+    _hiddenArtList = hiddenArtList {
     // set up processing for the underlying websocket output into SongInfo objects.
-    infoStream = infoWebsocket.infoStream.map(_onData).asBroadcastStream();
+    infoStream = infoWebsocket.infoStream.map(_processData).asBroadcastStream();
+    infoStream.listen(_onInfo);
     // create a stream that emits a new progress status every second.
     progressStream = Stream<ProgressStatus>.periodic(
       const Duration(seconds: 1),
@@ -37,6 +39,7 @@ class SongInfoRepo {
   }
 
   final InfoWebsocket _websocket;
+  final HiddenArtList _hiddenArtList;
 
   /// stream of SongInfo as it comes from the websocket.
   late final Stream<SongInfo> infoStream;
@@ -50,17 +53,16 @@ class SongInfoRepo {
   int get played => _played;
 
   /// converts a json map into a SongInfo object, and emits that to the info stream.
-  SongInfo _onData(Map<String, dynamic> data) {
+  SongInfo _processData(Map<String, dynamic> data) {
     // note the usage of .toString()
     // this is because, for example, 'songid' may be sent as an int or a string,
     // and if sent as an int, cannot be assigned to String songID.
     // in otherwords, it a guarantee of type safety for a dynamic type.
-    final String? albumID  = data['albumid'  ]?.toString();
     _latestInfo = SongInfo(
           songID: data['songid'   ]?.toString()          ?? '0', 
            title: data['title'    ]?.toString()          ?? '(untitled)', 
           artist: data['artist'   ]?.toString()          ?? '(unknown artist)', 
-         albumID: albumID                                ?? '0', 
+         albumID: data['albumid'  ]?.toString()          ?? '0', 
            album: data['album'    ]?.toString()          ?? '(unknown album)', 
           circle: data['circle'   ]?.toString()          ?? '(unknown circle)', 
         albumArt: data['albumart' ]?.toString()          ?? '',
@@ -69,8 +71,14 @@ class SongInfoRepo {
           played: json_util.tryToInt(data['played'    ]) ?? 0, 
        remaining: json_util.tryToInt(data['remaining' ]) ?? 0,
     );
-    _played = _latestInfo?.played ?? 0; // reset the elapsed time counter
+    _played = _latestInfo!.played; // reset the elapsed time counter
     return _latestInfo!;
+  }
+
+  void _onInfo(SongInfo info) {
+    // send the art hiding status to the status stream.
+    // unfortunately can't happen in _processData, because the art display may get the update first (bad)
+    _hiddenArtList.emitFor(_latestInfo!.albumID);
   }
 
   // this used to do something, and may again in the future.

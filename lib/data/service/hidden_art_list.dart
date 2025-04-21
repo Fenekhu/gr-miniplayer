@@ -44,6 +44,11 @@ class HiddenArtList {
     return (await list).contains(albumID);
   }
 
+  /// emits the art hiding status for a given song to the artHidingStatusStream
+  void emitFor(String albumID) {
+    contains(albumID).then((value) => _artHidingUpdatesController.add(ArtHidingStatus(albumID, value)));
+  }
+
   /// see dart Set.add
   Future<void> add(String albumID) async {
     if ((await list).add(albumID)) { // if changes were actually made to the list

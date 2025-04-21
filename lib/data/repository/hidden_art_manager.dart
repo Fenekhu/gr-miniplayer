@@ -9,7 +9,11 @@ class HiddenArtManager {
   final HiddenArtList _listService;
   Stream<ArtHidingStatus> get artHidingStatusStream => _listService.artHidingStatusStream;
 
+  /// see dart Set.contains
   Future<bool> contains(String albumID) => _listService.contains(albumID);
+
+  /// emits the art hiding status for a given song to the artHidingStatusStream
+  void emitFor(String albumID) => _listService.emitFor(albumID);
 
   /// hides the art and emits an event to the stream.
   /// does nothing if the art is already hidden.
@@ -21,4 +25,6 @@ class HiddenArtManager {
 
   /// toggles the art's visibility and emits an event to the stream.
   Future<void> toggle(String albumID) async => (await _listService.contains(albumID))? show(albumID) : hide(albumID);
+
+  
 }
